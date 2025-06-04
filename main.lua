@@ -76,5 +76,4 @@ function love.draw()
 
     -- ball time
     love.graphics.rectangle("fill", ballX, ballY, ballSize, ballSize);
-
 end
