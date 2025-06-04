@@ -6,6 +6,9 @@
 -- i think it's like 800 x 600
 WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
+-- font stuff
+font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+love.graphics.setFont(font)
 
 function love.load()
     -- wall stuff
@@ -25,6 +28,9 @@ function love.load()
     ballYDir = 1
     ballXDir = 1
     ballSpeed = 300
+
+    -- track score
+    score = 0
 
 end
 
@@ -65,6 +71,7 @@ function love.update(dt)
         -- y collision check
         if(ballY + ballSize >= paddleY) or (ballY <= paddleY + paddleHeight) then
             ballXDir = 1
+            score = score + 1
         end
     end
 end
@@ -113,5 +120,8 @@ function love.draw()
 
     -- trying out dashed line
     dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
+
+    -- score
+    love.graphics.printf(score, (WINDOWWIDTH / 2) - 100, 20, 100, "left")
     
 end
