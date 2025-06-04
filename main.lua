@@ -14,6 +14,7 @@ function love.load()
     -- paddle stuff
     paddleX = 20
     paddleY = 5
+    paddleWidth = 10
     paddleHeight = 70
     paddleSpeed = 300
 
@@ -58,6 +59,14 @@ function love.update(dt)
     if ballX >= (WINDOWWIDTH - 30) - ballSize then
         ballXDir = -1
     end
+
+    -- check for collisions w/ paddle
+    if ballX <= paddleX + paddleWidth then
+        -- y collision check
+        if(ballY + ballSize >= paddleY) or (ballY <= paddleY + paddleHeight) then
+            ballXDir = 1
+        end
+    end
 end
 
 --[[
@@ -88,7 +97,7 @@ end
 
 function love.draw()
     -- pong paddle
-    love.graphics.rectangle("fill", paddleX, paddleY, 10, paddleHeight);
+    love.graphics.rectangle("fill", paddleX, paddleY, paddleWidth, paddleHeight);
 
     -- top wall needs to be drawn
     love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, wallHeight);
