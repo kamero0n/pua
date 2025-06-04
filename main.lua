@@ -1,18 +1,38 @@
 --[[
-    description: making a moving rectangle
+    description: pong time
 ]]
 
 function love.load()
-    x = 100
+    -- wall stuff
+    wallWidth = 800
+    wallHeight = 10
+
+    -- paddle stuff
+    paddleX = 10
+    paddleY = 5
+    paddleSpeed = 300
+
+
 end
 
 
 function love.update(dt)
-    x = x + 100 * dt
+    if love.keyboard.isDown("down") then
+        paddleY = paddleY + paddleSpeed * dt
+    elseif love.keyboard.isDown("up") then
+        paddleY = paddleY - paddleSpeed * dt
+    end
 end
 
 
 function love.draw()
+    -- pong paddle
+    love.graphics.rectangle("fill", paddleX, paddleY, 10, 70);
 
-    love.graphics.rectangle("line", x, 50, 200, 150);
+    -- top wall needs to be drawn
+    love.graphics.rectangle("line", 0, 0, wallWidth, wallHeight);
+
+    -- bottom wall needs to be drawn
+    love.graphics.rectangle("line", 0, 590, wallWidth, wallHeight);
+
 end
