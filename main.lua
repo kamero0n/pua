@@ -1,19 +1,21 @@
 --[[
-    description: pong time
+    description: pong time... hope to add 3 modes like in the original: telstar tennis, handball, hockey
 ]]
+
+-- get window width & height
+WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
+
 
 function love.load()
     -- wall stuff
-    wallWidth = 800
     wallHeight = 10
-    bottomWallY = 590
+   -- bottomWallY = 590
 
     -- paddle stuff
-    paddleX = 10
+    paddleX = 20
     paddleY = 5
     paddleHeight = 70
     paddleSpeed = 300
-
 
 end
 
@@ -27,8 +29,8 @@ function love.update(dt)
 
     if paddleY <= wallHeight then
         paddleY = wallHeight
-    elseif paddleY >= bottomWallY - paddleHeight then
-        paddleY = bottomWallY - paddleHeight
+    elseif paddleY >= (WINDOWHEIGHT - wallHeight) - paddleHeight then
+        paddleY = (WINDOWHEIGHT - wallHeight) - paddleHeight
     end
 end
 
@@ -38,9 +40,9 @@ function love.draw()
     love.graphics.rectangle("fill", paddleX, paddleY, 10, paddleHeight);
 
     -- top wall needs to be drawn
-    love.graphics.rectangle("fill", 0, 0, wallWidth, wallHeight);
+    love.graphics.rectangle("line", 0, 0, WINDOWWIDTH, wallHeight);
 
     -- bottom wall needs to be drawn
-    love.graphics.rectangle("fill", 0, bottomWallY, wallWidth, wallHeight);
+    love.graphics.rectangle("line", 0, WINDOWHEIGHT - wallHeight, WINDOWWIDTH, wallHeight);
 
 end
