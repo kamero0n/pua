@@ -60,6 +60,28 @@ function love.update(dt)
     end
 end
 
+function dashLine(x1, y1, x2, y2)
+    -- distance formula first!
+    local dx, dy = x2 - x1, y2 - y1
+    local dist = math.sqrt((dx * dx) + (dy * dy))
+
+    -- these are the steps... for now, distX is just 0 since this is a purely vertical line
+    local distX = math.abs(dx) / dist
+    local distY = math.abs(dy) / dist
+
+    local currX = x1
+    local currY = y1
+    local gap = 10
+    for i = 0, dist do
+        currY = currY * distY + gap --currY * distY + gap 
+        local nextX = currX + distX
+        local nextY = currY + distY -- if i want to make the lines slightly longer, i can just add a const like 10 * distY... however note, it should not exceed the size of gap
+        love.graphics.line(currX, currY, nextX, nextY)
+    end
+
+    
+end
+
 
 function love.draw()
     -- pong paddle
@@ -76,4 +98,10 @@ function love.draw()
 
     -- ball time
     love.graphics.rectangle("fill", ballX, ballY, ballSize, ballSize);
+
+    -- trying out dashed line
+    dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
+   -- love.graphics.line(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
+
+    
 end
