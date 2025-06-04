@@ -60,6 +60,10 @@ function love.update(dt)
     end
 end
 
+--[[
+    i got this by adapting this function: https://love2d.org/forums/viewtopic.php?t=83808
+    + a lil math logic from claude to simplify the logic i had originally
+]]--
 function dashLine(x1, y1, x2, y2)
     -- distance formula first!
     local dx, dy = x2 - x1, y2 - y1
@@ -69,17 +73,16 @@ function dashLine(x1, y1, x2, y2)
     local distX = math.abs(dx) / dist
     local distY = math.abs(dy) / dist
 
-    local currX = x1
-    local currY = y1
     local gap = 10
+    local size = 5
     for i = 0, dist do
-        currY = currY * distY + gap --currY * distY + gap 
-        local nextX = currX + distX
-        local nextY = currY + distY -- if i want to make the lines slightly longer, i can just add a const like 10 * distY... however note, it should not exceed the size of gap
-        love.graphics.line(currX, currY, nextX, nextY)
-    end
+        local currX = x1 + (distX * i) * gap 
+        local currY = y1 + (distY * i) * gap
 
-    
+        local nextX = currX + distX * size -- + distX
+        local nextY = currY + distY * size --+ distY
+        love.graphics.line(currX, currY, nextX, nextY)
+    end  
 end
 
 
@@ -101,7 +104,5 @@ function love.draw()
 
     -- trying out dashed line
     dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
-   -- love.graphics.line(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
-
     
 end
