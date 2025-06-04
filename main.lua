@@ -20,7 +20,9 @@ function love.load()
     -- ball stuff
     ballX = 300
     ballY = 400
-    ballDir = 1
+    ballSize = 10
+    ballYDir = 1
+    ballXDir = 1
     ballSpeed = 300
 
 end
@@ -42,12 +44,19 @@ function love.update(dt)
     end
 
     -- ball movements
-    ballY = ballY + ballSpeed * ballDir * dt
+    ballX = ballX + ballSpeed * ballXDir * dt
+    ballY = ballY + ballSpeed * ballYDir * dt
 
-    if ballY >= (WINDOWHEIGHT - wallHeight) - 10 then
-        ballDir = -1
+    -- y pos ball wall constraints
+    if ballY >= (WINDOWHEIGHT - wallHeight) - ballSize then
+        ballYDir = -1
     elseif ballY <= wallHeight then
-        ballDir = 1
+        ballYDir = 1
+    end
+
+    -- x pos ball wall constraints
+    if ballX >= (WINDOWWIDTH - 30) - ballSize then
+        ballXDir = -1
     end
 end
 
@@ -62,7 +71,10 @@ function love.draw()
     -- bottom wall needs to be drawn
     love.graphics.rectangle("fill", 0, WINDOWHEIGHT - wallHeight, WINDOWWIDTH, wallHeight);
 
+    -- wall to the right will be drawn -- in the future this will be the "handball" mode
+    love.graphics.rectangle("fill", WINDOWWIDTH - 30, 0, wallHeight, WINDOWHEIGHT);
+
     -- ball time
-    love.graphics.rectangle("fill", ballX, ballY, 10, 10);
+    love.graphics.rectangle("fill", ballX, ballY, ballSize, ballSize);
 
 end
