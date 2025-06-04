@@ -69,7 +69,7 @@ function love.update(dt)
     -- check for collisions w/ paddle
     if ballX <= paddleX + paddleWidth then
         -- y collision check
-        if(ballY + ballSize >= paddleY) or (ballY <= paddleY + paddleHeight) then
+        if(ballY + ballSize >= paddleY) and (ballY <= paddleY + paddleHeight) then
             ballXDir = 1
             score = score + 1
         end
