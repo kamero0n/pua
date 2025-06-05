@@ -1,6 +1,9 @@
 --[[
     description: pong time... hope to add 3 modes like in the original: telstar tennis, handball, hockey
-]]
+    currently, working on telstar tennis
+]]--
+
+require "TEsound"
 
 -- get window width & height
 -- i think it's like 800 x 600
@@ -9,6 +12,7 @@ WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 -- font stuff
 font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
 love.graphics.setFont(font)
+
 
 function love.load()
     -- wall stuff
@@ -31,6 +35,18 @@ function love.load()
 
     -- track score
     score = 0
+
+    -- track game state
+    lose = false
+
+    -- sound effects!
+    wallHits = {
+        "assets/audio/sound_effects/wallHit1.wav",
+        "assets/audio/sound_effects/wallHit2.wav",
+        "assets/audio/sound_effects/wallHit3.wav"
+    }
+
+    paddleHit = "assets/audio/sound_effects/paddleHit.wav"
 
 end
 
@@ -57,23 +73,41 @@ function love.update(dt)
     -- y pos ball wall constraints
     if ballY >= (WINDOWHEIGHT - wallHeight) - ballSize then
         ballYDir = -1
+        
+        TEsound.play(wallHits, "static")
     elseif ballY <= wallHeight then
         ballYDir = 1
+
+        TEsound.play(wallHits, "static")
     end
 
     -- x pos ball wall constraints
     if ballX >= (WINDOWWIDTH - 30) - ballSize then
         ballXDir = -1
+
+       TEsound.play(wallHits, "static")
     end
 
     -- check for collisions w/ paddle
-    if ballX <= paddleX + paddleWidth then
-        -- y collision check
-        if(ballY + ballSize >= paddleY) and (ballY <= paddleY + paddleHeight) then
-            ballXDir = 1
-            score = score + 1
+    if lose == false then
+         if ballX <= paddleX + paddleWidth then
+            -- y collision check
+            if(ballY + ballSize >= paddleY) and (ballY <= paddleY + paddleHeight) then
+                ballXDir = 1
+                score = score + 1
+
+                paddleSpeed = paddleSpeed + 1
+                ballSpeed = ballSpeed + 1
+
+                TEsound.play(paddleHit, "static")
+            else
+                lose = true
+            end
         end
     end
+
+    -- they told me to do this
+    TEsound.cleanup()
 end
 
 --[[
