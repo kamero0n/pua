@@ -48,6 +48,7 @@ function love.load()
 
     paddleHit = "assets/audio/sound_effects/paddleHit.wav"
 
+    TEsound.volume("all", .1)
 end
 
 
