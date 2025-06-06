@@ -19,11 +19,12 @@ function love.load()
     wallHeight = 10
 
     -- paddle stuff
-    paddleX = 20
-    paddleY = 5
-    paddleWidth = 10
-    paddleHeight = 70
-    paddleSpeed = 300
+    paddle = {}
+    paddle.x = 20
+    paddle.y = 5
+    paddle.width = 10
+    paddle.height = 70
+    paddle.speed = 300
 
     -- ball stuff
     ballX = 300
@@ -55,16 +56,16 @@ end
 function love.update(dt)
     -- paddle movements
     if love.keyboard.isDown("down") then
-        paddleY = paddleY + paddleSpeed * dt
+        paddle.y  = paddle.y  + paddle.speed * dt
     elseif love.keyboard.isDown("up") then
-        paddleY = paddleY - paddleSpeed * dt
+        paddle.y  = paddle.y  - paddle.speed * dt
     end
 
     -- paddle constraints/limits
-    if paddleY <= wallHeight then
-        paddleY = wallHeight
-    elseif paddleY >= (WINDOWHEIGHT - wallHeight) - paddleHeight then
-        paddleY = (WINDOWHEIGHT - wallHeight) - paddleHeight
+    if paddle.y  <= wallHeight then
+        paddle.y  = wallHeight
+    elseif paddle.y  >= (WINDOWHEIGHT - wallHeight) - paddle.height then
+        paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
     end
 
     -- ball movements
@@ -91,13 +92,13 @@ function love.update(dt)
 
     -- check for collisions w/ paddle
     if lose == false then
-         if ballX <= paddleX + paddleWidth then
+         if ballX <= paddle.x + paddle.width then
             -- y collision check
-            if(ballY + ballSize >= paddleY) and (ballY <= paddleY + paddleHeight) then
+            if(ballY + ballSize >= paddle.y ) and (ballY <= paddle.y + paddle.height) then
                 ballXDir = 1
                 score = score + 1
 
-                paddleSpeed = paddleSpeed + 1
+                paddle.speed = paddle.speed + 1
                 ballSpeed = ballSpeed + 1
 
                 TEsound.play(paddleHit, "static")
@@ -139,7 +140,7 @@ end
 
 function love.draw()
     -- pong paddle
-    love.graphics.rectangle("fill", paddleX, paddleY, paddleWidth, paddleHeight);
+    love.graphics.rectangle("fill", paddle.x, paddle.y, paddle.width, paddle.height);
 
     -- top wall needs to be drawn
     love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, wallHeight);
@@ -157,6 +158,6 @@ function love.draw()
     dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
 
     -- score
-    love.graphics.printf(score, (WINDOWWIDTH / 2) - 100, 20, 100, "left")
+    love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
     
 end
