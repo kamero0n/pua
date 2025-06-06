@@ -15,24 +15,32 @@ love.graphics.setFont(font)
 
 
 function love.load()
+    Object = require "classic"
+
     -- wall stuff
     wallHeight = 10
 
     -- paddle stuff
-    paddle = {}
-    paddle.x = 20
-    paddle.y = 5
-    paddle.width = 10
-    paddle.height = 70
-    paddle.speed = 300
+    paddle = {
+        x = 20,
+        y = 5,
+        width = 10,
+        height = 70,
+        speed = 500
+    }
 
     -- ball stuff
-    ballX = 300
-    ballY = 400
-    ballSize = 10
-    ballYDir = 1
-    ballXDir = 1
-    ballSpeed = 300
+    ball = {
+        x = 300,
+        y = 400, 
+        width = 10,
+        height = 10
+    }
+
+    ball_velocity = {
+        x = 300,
+        y = 300
+    }
 
     -- track score
     score = 0
@@ -62,44 +70,43 @@ function love.update(dt)
     end
 
     -- paddle constraints/limits
-    if paddle.y  <= wallHeight then
+    if paddle.y  < wallHeight then
         paddle.y  = wallHeight
-    elseif paddle.y  >= (WINDOWHEIGHT - wallHeight) - paddle.height then
+    elseif paddle.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
         paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
     end
 
     -- ball movements
-    ballX = ballX + ballSpeed * ballXDir * dt
-    ballY = ballY + ballSpeed * ballYDir * dt
+    ball.x = ball.x + ball_velocity.x * dt--ballSpeed * ballXDir * dt
+    ball.y = ball.y + ball_velocity.y * dt--ballSpeed * ballYDir * dt
 
     -- y pos ball wall constraints
-    if ballY >= (WINDOWHEIGHT - wallHeight) - ballSize then
-        ballYDir = -1
-        
+    if ball.y >= (WINDOWHEIGHT - wallHeight) - ball.height then
+        ball_velocity.y = ball_velocity.y * (-1)
+
         TEsound.play(wallHits, "static")
-    elseif ballY <= wallHeight then
-        ballYDir = 1
+    end
+
+    if ball.y <= wallHeight then
+        ball_velocity.y = ball_velocity.y * (-1)
 
         TEsound.play(wallHits, "static")
     end
 
     -- x pos ball wall constraints
-    if ballX >= (WINDOWWIDTH - 30) - ballSize then
-        ballXDir = -1
+    if ball.x >= (WINDOWWIDTH - 30) - ball.width then
+        ball_velocity.x = ball_velocity.x * (-1)
 
        TEsound.play(wallHits, "static")
     end
 
     -- check for collisions w/ paddle
     if lose == false then
-         if ballX <= paddle.x + paddle.width then
+         if ball.x <= paddle.x + paddle.width then
             -- y collision check
-            if(ballY + ballSize >= paddle.y ) and (ballY <= paddle.y + paddle.height) then
-                ballXDir = 1
+            if(ball.y + ball.height >= paddle.y ) and (ball.y <= paddle.y + paddle.height) then
+                ball_velocity.x = ball_velocity.x * (-1)
                 score = score + 1
-
-                paddle.speed = paddle.speed + 1
-                ballSpeed = ballSpeed + 1
 
                 TEsound.play(paddleHit, "static")
             else
@@ -152,7 +159,7 @@ function love.draw()
     love.graphics.rectangle("fill", WINDOWWIDTH - 30, 0, wallHeight, WINDOWHEIGHT);
 
     -- ball time
-    love.graphics.rectangle("fill", ballX, ballY, ballSize, ballSize);
+    love.graphics.rectangle("fill", ball.x, ball.y, ball.width, ball.height);
 
     -- trying out dashed line
     dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
