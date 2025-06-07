@@ -1,6 +1,6 @@
 --[[
     description: pong time... hope to add 3 modes like in the original: telstar tennis, handball, hockey
-    currently, working on telstar tennis
+    currently, working on handball
 ]]--
 
 require "TEsound"
@@ -15,8 +15,6 @@ love.graphics.setFont(font)
 
 
 function love.load()
-    Object = require "classic"
-
     -- wall stuff
     wallHeight = 10
 
@@ -57,7 +55,7 @@ function love.load()
 
     paddleHit = "assets/audio/sound_effects/paddleHit.wav"
 
-    TEsound.volume("all", .1)
+    TEsound.volume("all", .3)
 end
 
 
@@ -81,31 +79,34 @@ function love.update(dt)
     ball.y = ball.y + ball_velocity.y * dt--ballSpeed * ballYDir * dt
 
     -- y pos ball wall constraints
-    if ball.y >= (WINDOWHEIGHT - wallHeight) - ball.height then
+    if ball.y > (WINDOWHEIGHT - wallHeight) - ball.height then
         ball_velocity.y = ball_velocity.y * (-1)
+        ball.y = (WINDOWHEIGHT - wallHeight) - ball.height
 
         TEsound.play(wallHits, "static")
-    end
-
-    if ball.y <= wallHeight then
+    elseif ball.y < wallHeight then
         ball_velocity.y = ball_velocity.y * (-1)
+        ball.y = wallHeight
 
         TEsound.play(wallHits, "static")
     end
 
     -- x pos ball wall constraints
-    if ball.x >= (WINDOWWIDTH - 30) - ball.width then
+    if ball.x > (WINDOWWIDTH - 30) - ball.width then
         ball_velocity.x = ball_velocity.x * (-1)
+        ball.x = (WINDOWWIDTH - 30) - ball.width
 
        TEsound.play(wallHits, "static")
     end
 
     -- check for collisions w/ paddle
     if lose == false then
-         if ball.x <= paddle.x + paddle.width then
+         if ball.x < paddle.x + paddle.width then
             -- y collision check
-            if(ball.y + ball.height >= paddle.y ) and (ball.y <= paddle.y + paddle.height) then
+            if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
                 ball_velocity.x = ball_velocity.x * (-1)
+                ball.x = paddle.x + paddle.width
+                
                 score = score + 1
 
                 TEsound.play(paddleHit, "static")
@@ -123,7 +124,7 @@ end
     i got this by adapting this function: https://love2d.org/forums/viewtopic.php?t=83808
     + a lil math logic from claude to simplify the logic i had originally
 ]]--
-function dashLine(x1, y1, x2, y2)
+function dashLine(x1, y1, x2, y2, numDashes)
     -- distance formula first!
     local dx, dy = x2 - x1, y2 - y1
     local dist = math.sqrt((dx * dx) + (dy * dy))
@@ -132,16 +133,16 @@ function dashLine(x1, y1, x2, y2)
     local distX = math.abs(dx) / dist
     local distY = math.abs(dy) / dist
 
-    local gap = 10
-    local size = 5
-    for i = 0, dist do
+    local gap = 30
+    local size = 10
+    for i = 0, numDashes do
         local currX = x1 + (distX * i) * gap 
         local currY = y1 + (distY * i) * gap
 
         local nextX = currX + distX * size -- + distX
         local nextY = currY + distY * size --+ distY
         love.graphics.line(currX, currY, nextX, nextY)
-    end  
+    end
 end
 
 
@@ -162,7 +163,7 @@ function love.draw()
     love.graphics.rectangle("fill", ball.x, ball.y, ball.width, ball.height);
 
     -- trying out dashed line
-    dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT);
+    dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT, 25);
 
     -- score
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
