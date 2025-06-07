@@ -15,6 +15,12 @@ love.graphics.setFont(font)
 
 
 function love.load()
+    myShader = love.graphics.newShader("assets/shaders/chrom.glsl")
+
+
+    -- create canvas
+    gameCanvas = love.graphics.newCanvas(WINDOWWIDTH, WINDOWHEIGHT)
+
     -- wall stuff
     wallHeight = 10
 
@@ -134,7 +140,7 @@ function dashLine(x1, y1, x2, y2, numDashes)
     local distY = math.abs(dy) / dist
 
     local gap = 30
-    local size = 10
+    local size = 20
     for i = 0, numDashes do
         local currX = x1 + (distX * i) * gap 
         local currY = y1 + (distY * i) * gap
@@ -147,6 +153,14 @@ end
 
 
 function love.draw()
+    love.graphics.setCanvas(gameCanvas)
+    love.graphics.clear()
+
+    love.graphics.setColor(0, 0, 0, 1)
+    love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+    love.graphics.setColor(1, 1, 1, 1)
+
     -- pong paddle
     love.graphics.rectangle("fill", paddle.x, paddle.y, paddle.width, paddle.height);
 
@@ -168,4 +182,9 @@ function love.draw()
     -- score
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
     
+    love.graphics.setCanvas()
+    love.graphics.setShader(myShader)
+
+    love.graphics.draw(gameCanvas, 0, 0);
+    love.graphics.setShader()
 end
