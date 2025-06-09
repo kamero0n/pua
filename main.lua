@@ -12,14 +12,17 @@ local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 -- game state
 local game_state = 'menu'
 local menus = {
-    'Play',
+    'Handball',
     'Quit'
 }
 local selected_menu_item = 1
 
 -- font stuff
-font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
+-- shader stuff
+local crtShader
 
 function love.load()
     crtShader = love.graphics.newShader("assets/shaders/chrom.glsl")
@@ -177,11 +180,10 @@ function drawMenu()
     local startY = WINDOWHEIGHT / 2 - (fontHeight * (#menus / 2))
     local titleY = 20
     local menu = {
-        x = 310,
-        font = 20
+        x = 310
     }
     local pointer = {
-        x = 345,
+        x = 115,
         y = 10 + startY,
         width = 20,
         height = 10,
@@ -193,15 +195,15 @@ function drawMenu()
 
     love.graphics.printf("PONG", startX - 90, titleY, font:getWidth("PONG"), "center")
 
-    local newFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", menu.font) 
-    love.graphics.setFont(newFont)
+    love.graphics.setFont(smallFont)
 
     -- draw menu items
     for i = 1, #menus do
-
         if i == selected_menu_item then
-            drawBoid("fill", pointer.x, pointer.y + fontHeight * (i - 1), pointer.width, pointer.height, pointer.angle)
+            drawBoid("fill", menu.x - smallFont:getWidth(menus[selected_menu_item]) + pointer.x, pointer.y + fontHeight * (i - 1), pointer.width, pointer.height, pointer.angle)
         end
+
+        print(smallFont:getWidth(menus[selected_menu_item]))
 
         love.graphics.printf(menus[i], menu.x, startY + fontHeight * (i - 1), 200, "center")
     end
