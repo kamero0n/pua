@@ -4,6 +4,7 @@
 ]]--
 
 require "gamemodes/handball"
+require "gamemodes/tennis_1p"
 require "TEsound"
 
 -- get window width & height
@@ -34,6 +35,7 @@ function love.load()
 
     -- init game modes
     Handball.init()
+    Tennis_1P.init()
 
     -- sound effects!
     wallHits = {
@@ -44,6 +46,8 @@ function love.load()
 
     paddleHit = "assets/audio/sound_effects/paddleHit.wav"
 
+    paddleAIHit = "assets/audio/sound_effects/paddleAIHit.wav"
+
     TEsound.volume("all", .3)
 end
 
@@ -52,6 +56,8 @@ function love.update(dt)
     
     if game_state == 'handball' then
         Handball.handball(dt)
+    elseif game_state == 'tennis_1p' then
+        Tennis_1P.tennis(dt)
     end
 
     -- check if handball lost
@@ -150,8 +156,10 @@ function love.draw()
 
     if game_state == "menu" then
         drawMenu()
-    else
+    elseif game_state == "handball" then
         Handball.drawGame()
+    elseif game_state == "tennis_1p" then
+        Tennis_1P.drawGame()
     end
     
     -- i think this means we take the canvas out as it is now ready to be used
@@ -187,8 +195,12 @@ function menu_keypressed(key)
     elseif key == 'return' or key == 'kpenter' then
         if menus[selected_menu_item] == 'Handball' then
             Handball.init()
-            
+
             game_state = 'handball'
+        elseif menus[selected_menu_item] == 'Tennis (1P)' then
+            Tennis_1P.init()
+
+            game_state = 'tennis_1p'
         elseif menus[selected_menu_item] == 'Quit' then
             love.event.quit()
         end
