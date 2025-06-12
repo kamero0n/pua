@@ -6,7 +6,7 @@ local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
 
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
-local wallHeight, paddle, ball, ball_velocity, score, lose
+local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed
 
 function Handball.init()
     -- wall stuff
@@ -34,6 +34,8 @@ function Handball.init()
         y = 300
     }
 
+    max_speed = 700
+
     -- track score
     score = 0
 
@@ -43,7 +45,7 @@ function Handball.init()
 end
 
 function Handball.handball(dt)
--- paddle movements
+        -- paddle movements
         if love.keyboard.isDown("down") then
             paddle.y  = paddle.y  + paddle.speed * dt
         elseif love.keyboard.isDown("up") then
@@ -91,13 +93,40 @@ function Handball.handball(dt)
                     ball.x = paddle.x + paddle.width
 
                     score = score + 1
+                    TEsound.play(scoreDing, "static", 0.5)
 
                     TEsound.play(paddleHit, "static")
+
+                    -- every five hits increase the speed of the ball ... max speed at 800
+                    if score % 5 == 0 and score ~= 0 then
+                        if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
+                            if ball_velocity.x < 0 then
+                                ball_velocity.x = ball_velocity.x - 100.0
+                            else
+                                ball_velocity.x = ball_velocity.x + 100.0
+                            end
+
+                            TEsound.play(speedIncrease, "static")
+                        end
+
+                        if ball_velocity.y <= max_speed and ball_velocity.y >= -max_speed then
+                            if ball_velocity.y < 0 then
+                                ball_velocity.y = ball_velocity.y - 100.0
+                            else
+                                ball_velocity.y = ball_velocity.y + 100.0
+                            end
+
+                            TEsound.play(speedIncrease, "static")
+                        end
+                    end
+
                 else
                     lose = true
                 end
             end
         end
+
+
 end
 
 function Handball.isGameOver()

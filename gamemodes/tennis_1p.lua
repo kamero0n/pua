@@ -83,7 +83,7 @@ function Tennis_1P.tennis(dt)
     end
 
     -- AI movements
-    paddle_ai.y = ball.y - 10.
+    paddle_ai.y = ball.y
 
     -- ai paddle constraints/limits
     if paddle_ai.y  < wallHeight then
@@ -99,12 +99,29 @@ function Tennis_1P.tennis(dt)
             ball_velocity.x = ball_velocity.x * (-1)
             ball.x = paddle_ai.x
 
-            AI_score = AI_score + 1
-
             TEsound.play(paddleAIHit, "static")
         end
     end
 
+    if lose == false then
+        if ball.x < paddle.x + paddle.width then
+            if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
+                ball_velocity.x = ball_velocity.x * (-1)
+                ball.x = paddle.x + paddle.width
+
+                TEsound.play(paddleHit, "static")
+            else
+                AI_score = AI_score + 1
+
+                ball.x = 400
+                ball.y = 300
+            end
+        end
+    end
+
+    if AI_score == 10 then
+        lose = true
+    end
 end
 
 

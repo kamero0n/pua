@@ -48,6 +48,10 @@ function love.load()
 
     paddleAIHit = "assets/audio/sound_effects/paddleAIHit.wav"
 
+    scoreDing = "assets/audio/sound_effects/score.wav"
+
+    speedIncrease = "assets/audio/sound_effects/speedIncrease.wav"
+
     TEsound.volume("all", .3)
 end
 
