@@ -3,10 +3,10 @@ Handball = {}
 
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
-
-
-local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
 local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed
+
+local endScreen = false
 
 function Handball.init()
     -- wall stuff
@@ -14,7 +14,7 @@ function Handball.init()
 
     -- paddle stuff
     paddle = {
-        x = 20,
+        x = 10,
         y = 5,
         width = 10,
         height = 70,
@@ -24,14 +24,14 @@ function Handball.init()
     -- ball stuff
     ball = {
         x = 300,
-        y = 400, 
+        y = 400,
         width = 10,
         height = 10
     }
 
     ball_velocity = {
-        x = 300,
-        y = 300
+        x = 200,
+        y = 200
     }
 
     max_speed = 700
@@ -125,7 +125,15 @@ function Handball.handball(dt)
                 end
             end
         end
+    
+    if lose == true then
+        if ball.x < 0 then
+            ball_velocity.x = 0
+            ball_velocity.y = 0
+        end
 
+        endScreen = true
+    end
 
 end
 
@@ -160,5 +168,12 @@ function Handball.drawGame()
 
     -- score
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
+
+    if endScreen == true then
+        -- fill up the background to be black!
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+    end
 
 end
