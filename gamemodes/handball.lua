@@ -4,9 +4,7 @@ Handball = {}
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
-local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed
-
-local endScreen = false
+local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen, screenCounter
 
 function Handball.init()
     -- wall stuff
@@ -42,6 +40,12 @@ function Handball.init()
     -- flag for loss
     lose = false
 
+    -- endScreen
+    endScreen = false
+
+    -- count for how long the end screen should appear
+    screenCounter = 0
+
 end
 
 function Handball.handball(dt)
@@ -50,6 +54,10 @@ function Handball.handball(dt)
             paddle.y  = paddle.y  + paddle.speed * dt
         elseif love.keyboard.isDown("up") then
             paddle.y  = paddle.y  - paddle.speed * dt
+        end
+
+        if love.keyboard.isDown("m") then
+            lose = true
         end
 
         -- paddle constraints/limits
@@ -86,7 +94,7 @@ function Handball.handball(dt)
 
         -- check for collisions w/ paddle
         if lose == false then
-            if ball.x < paddle.x + paddle.width then
+            if ball.x < paddle.x + ball.width then
                 -- y collision check
                 if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
                     ball_velocity.x = ball_velocity.x * (-1)
@@ -121,20 +129,26 @@ function Handball.handball(dt)
                     end
 
                 else
-                    lose = true
+                    endScreen = true
                 end
             end
         end
     
-    if lose == true then
-        if ball.x < 0 then
-            ball_velocity.x = 0
-            ball_velocity.y = 0
-        end
+    if endScreen == true then
+        ball_velocity.x = 0
+        ball_velocity.y = 0
 
-        endScreen = true
+        screenCounter = screenCounter + dt
+
+        if screenCounter > 2 then
+            lose = true
+        end
     end
 
+end
+
+function love.conf(t)
+    t.console = true
 end
 
 function Handball.isGameOver()
@@ -170,9 +184,14 @@ function Handball.drawGame()
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
 
     if endScreen == true then
-        -- fill up the background to be black!
+        -- fill up the background to be black! with some opacity
         love.graphics.setColor(0, 0, 0, 0.5)
         love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+        -- then we will add text
+        love.graphics.setColor(1, 1, 1, 1) -- make text white
+
+        love.graphics.printf("LOSE", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 10, 200, "left")
 
     end
 
