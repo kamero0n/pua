@@ -109,9 +109,9 @@ function Handball.handball(dt)
                     if score % 5 == 0 and score ~= 0 then
                         if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
                             if ball_velocity.x < 0 then
-                                ball_velocity.x = ball_velocity.x - 100.0
+                                ball_velocity.x = ball_velocity.x - 50.0
                             else
-                                ball_velocity.x = ball_velocity.x + 100.0
+                                ball_velocity.x = ball_velocity.x + 50.0
                             end
 
                             TEsound.play(speedIncrease, "static")
@@ -119,9 +119,9 @@ function Handball.handball(dt)
 
                         if ball_velocity.y <= max_speed and ball_velocity.y >= -max_speed then
                             if ball_velocity.y < 0 then
-                                ball_velocity.y = ball_velocity.y - 100.0
+                                ball_velocity.y = ball_velocity.y - 50.0
                             else
-                                ball_velocity.y = ball_velocity.y + 100.0
+                                ball_velocity.y = ball_velocity.y + 50.0
                             end
 
                             TEsound.play(speedIncrease, "static")
@@ -135,8 +135,10 @@ function Handball.handball(dt)
         end
     
     if endScreen == true then
-        ball_velocity.x = 0
-        ball_velocity.y = 0
+        if ball.x < 0 then
+            ball_velocity.x = 0
+            ball_velocity.y = 0
+        end
 
         screenCounter = screenCounter + dt
 

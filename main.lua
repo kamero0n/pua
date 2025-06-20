@@ -15,7 +15,7 @@ local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 local game_state = 'menu'
 local menus = {
     'Handball',
-    'Tennis (1P)',
+   -- 'Tennis (1P)',
     'Quit'
 }
 local selected_menu_item = 1
@@ -26,6 +26,9 @@ local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20)
 
 -- shader stuff
 local crtShader
+
+-- audio stuff
+local selectDing
 
 function love.load()
     crtShader = love.graphics.newShader("assets/shaders/chrom.glsl")
@@ -51,6 +54,8 @@ function love.load()
     scoreDing = "assets/audio/sound_effects/score.wav"
 
     speedIncrease = "assets/audio/sound_effects/speedIncrease.wav"
+
+    selectDing = "assets/audio/sound_effects/select.wav"
 
     TEsound.volume("all", .3)
 end
@@ -115,7 +120,7 @@ function drawMenu()
     local startY = WINDOWHEIGHT / 2 - (fontHeight * (#menus / 2))
     local titleY = 20
     local menu = {
-        x = 270
+        x = 260
     }
     local pointer = {
         x = 160,
@@ -197,6 +202,8 @@ function menu_keypressed(key)
             selected_menu_item = 1
         end
     elseif key == 'return' or key == 'kpenter' then
+        TEsound.play(selectDing, "static")
+
         if menus[selected_menu_item] == 'Handball' then
             Handball.init()
 
