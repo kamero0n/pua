@@ -31,6 +31,9 @@ local crtShader
 handball_highscore = 0
 
 function love.load()
+    -- set title window
+    love.window.setTitle("pua")
+
     crtShader = love.graphics.newShader("assets/shaders/chrom.glsl")
 
     -- create canvas
@@ -191,6 +194,8 @@ end
 
 function menu_keypressed(key)
     if key == 'escape' then
+        TEsound.play(selectDing, "static")
+
         love.event.quit()
     elseif key == 'up' then
         selected_menu_item = selected_menu_item - 1
