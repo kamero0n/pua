@@ -27,9 +27,6 @@ local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20)
 -- shader stuff
 local crtShader
 
--- audio stuff
-local selectDing
-
 -- high scores
 handball_highscore = 0
 
@@ -186,8 +183,11 @@ end
 function love.keypressed(key, scan_code, is_repeat)
     if game_state == "menu" then
         menu_keypressed(key)
+    elseif game_state == "handball" then
+        Handball.keypressed(key)
     end
 end
+
 
 function menu_keypressed(key)
     if key == 'escape' then

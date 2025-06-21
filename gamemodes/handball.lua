@@ -7,6 +7,7 @@ local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
 local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen, screenCounter
 
 local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30) 
+local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 function Handball.init()
     -- wall stuff
@@ -35,6 +36,46 @@ function Handball.init()
     }
 
     max_speed = 700
+
+    -- track score
+    score = 0
+
+    -- flag for loss
+    lose = false
+
+    -- endScreen
+    endScreen = false
+
+    -- count for how long the end screen should appear
+    screenCounter = 0
+end
+
+function Handball.reset()
+    -- reset all the variables
+    -- wall stuff
+    wallHeight = 10
+
+    -- paddle stuff
+    paddle = {
+        x = 10,
+        y = 5,
+        width = 10,
+        height = 70,
+        speed = 500
+    }
+
+    -- ball stuff
+    ball = {
+        x = 300,
+        y = 400,
+        width = 10,
+        height = 10
+    }
+
+    ball_velocity = {
+        x = 200,
+        y = 200
+    }
 
     -- track score
     score = 0
@@ -150,15 +191,24 @@ function Handball.handball(dt)
             screenCounter = screenCounter + dt
 
             if screenCounter > 2 then
-                lose = true
+                --lose = true
             end
         end
 
 
 end
 
-function love.conf(t)
-    t.console = true
+function Handball.keypressed(key)
+    if key == '1' then
+        TEsound.play(selectDing, "static")
+        Handball.reset()
+
+        endScreen = false
+    elseif key == '2' then
+        TEsound.play(selectDing, "static")
+        lose = true
+    end
+
 end
 
 function Handball.isGameOver()
@@ -201,18 +251,20 @@ function Handball.drawGame()
         -- then we will add text
         love.graphics.setColor(1, 1, 1, 1) -- make text white
 
-        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 100, 200, "left")
+        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 150, 200, "left")
 
         -- set smaller font
         love.graphics.setFont(smallFont)
-        love.graphics.printf("score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2 + 20, 400, "left")
+        love.graphics.printf("score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2, 400, "left")
        -- love.graphics.printf(handball_highscore, WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 + 20, 200, "center")
-        love.graphics.printf(score, WINDOWWIDTH / 2 + 10, WINDOWHEIGHT / 2 + 20, 200, "center")
+        love.graphics.printf(score, WINDOWWIDTH / 2 + 10, WINDOWHEIGHT / 2, 200, "center")
 
-        love.graphics.printf("hi-score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2 + 60, 400, "left")
+        love.graphics.printf("Hi-score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2 + 60, 400, "left")
         love.graphics.printf(handball_highscore, WINDOWWIDTH / 2 + 10, WINDOWHEIGHT / 2 + 60, 200, "center")
 
-        
+        -- go back to menu or restart
+        love.graphics.setFont(smallerFont)
+        love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 300, WINDOWHEIGHT / 2 + 150, 400, "left")
+        love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 150, 400, "left")
     end
-
 end
