@@ -6,6 +6,8 @@ local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
 local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen, screenCounter
 
+local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30) 
+
 function Handball.init()
     -- wall stuff
     wallHeight = 10
@@ -45,7 +47,6 @@ function Handball.init()
 
     -- count for how long the end screen should appear
     screenCounter = 0
-
 end
 
 function Handball.handball(dt)
@@ -57,7 +58,7 @@ function Handball.handball(dt)
         end
 
         if love.keyboard.isDown("m") then
-            lose = true
+            endScreen = true
         end
 
         -- paddle constraints/limits
@@ -93,7 +94,7 @@ function Handball.handball(dt)
         end
 
         -- check for collisions w/ paddle
-        if lose == false then
+        if lose == false and endScreen ~= true then
             if ball.x < paddle.x + ball.width then
                 -- y collision check
                 if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
@@ -133,19 +134,26 @@ function Handball.handball(dt)
                 end
             end
         end
+
+        if score > handball_highscore then
+            handball_highscore = score
+        end
     
-    if endScreen == true then
-        if ball.x < 0 then
-            ball_velocity.x = 0
-            ball_velocity.y = 0
+
+        -- handle end screen
+        if endScreen == true then
+            if ball.x < 0 then
+                ball_velocity.x = 0
+                ball_velocity.y = 0
+            end
+
+            screenCounter = screenCounter + dt
+
+            if screenCounter > 2 then
+                lose = true
+            end
         end
 
-        screenCounter = screenCounter + dt
-
-        if screenCounter > 2 then
-            lose = true
-        end
-    end
 
 end
 
@@ -193,8 +201,18 @@ function Handball.drawGame()
         -- then we will add text
         love.graphics.setColor(1, 1, 1, 1) -- make text white
 
-        love.graphics.printf("LOSE", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 10, 200, "left")
+        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 100, 200, "left")
 
+        -- set smaller font
+        love.graphics.setFont(smallFont)
+        love.graphics.printf("score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2 + 20, 400, "left")
+       -- love.graphics.printf(handball_highscore, WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 + 20, 200, "center")
+        love.graphics.printf(score, WINDOWWIDTH / 2 + 10, WINDOWHEIGHT / 2 + 20, 200, "center")
+
+        love.graphics.printf("hi-score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2 + 60, 400, "left")
+        love.graphics.printf(handball_highscore, WINDOWWIDTH / 2 + 10, WINDOWHEIGHT / 2 + 60, 200, "center")
+
+        
     end
 
 end

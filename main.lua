@@ -21,7 +21,7 @@ local menus = {
 local selected_menu_item = 1
 
 -- font stuff
-local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
 local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 -- shader stuff
@@ -29,6 +29,9 @@ local crtShader
 
 -- audio stuff
 local selectDing
+
+-- high scores
+handball_highscore = 0
 
 function love.load()
     crtShader = love.graphics.newShader("assets/shaders/chrom.glsl")
