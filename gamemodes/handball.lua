@@ -4,7 +4,7 @@ Handball = {}
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
-local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen, screenCounter
+local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen
 
 local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30) 
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
@@ -24,15 +24,15 @@ function Handball.init()
 
     -- ball stuff
     ball = {
-        x = 300,
+        x = WINDOWWIDTH / 2,
         y = 400,
         width = 10,
         height = 10
     }
 
     ball_velocity = {
-        x = 200,
-        y = 200
+        x = -200,
+        y = -200
     }
 
     max_speed = 700
@@ -45,37 +45,22 @@ function Handball.init()
 
     -- endScreen
     endScreen = false
-
-    -- count for how long the end screen should appear
-    screenCounter = 0
 end
 
 function Handball.reset()
     -- reset all the variables
-    -- wall stuff
-    wallHeight = 10
 
     -- paddle stuff
-    paddle = {
-        x = 10,
-        y = 5,
-        width = 10,
-        height = 70,
-        speed = 500
-    }
+    paddle.x = 10
+    paddle.y = 5
+    paddle.speed = 500
 
     -- ball stuff
-    ball = {
-        x = 300,
-        y = 400,
-        width = 10,
-        height = 10
-    }
+    ball.x = WINDOWWIDTH / 2
+    ball.y = math.random(10, WINDOWHEIGHT - wallHeight)
 
-    ball_velocity = {
-        x = 200,
-        y = 200
-    }
+    ball_velocity.x = -200
+    ball_velocity.y = -200
 
     -- track score
     score = 0
@@ -85,9 +70,6 @@ function Handball.reset()
 
     -- endScreen
     endScreen = false
-
-    -- count for how long the end screen should appear
-    screenCounter = 0
 end
 
 function Handball.handball(dt)
@@ -187,12 +169,6 @@ function Handball.handball(dt)
                 ball_velocity.x = 0
                 ball_velocity.y = 0
             end
-
-            screenCounter = screenCounter + dt
-
-            if screenCounter > 2 then
-                --lose = true
-            end
         end
 
 
@@ -255,7 +231,7 @@ function Handball.drawGame()
 
         -- set smaller font
         love.graphics.setFont(smallFont)
-        love.graphics.printf("score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2, 400, "left")
+        love.graphics.printf("Score: ", WINDOWWIDTH / 2 - 200, WINDOWHEIGHT / 2, 400, "left")
        -- love.graphics.printf(handball_highscore, WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 + 20, 200, "center")
         love.graphics.printf(score, WINDOWWIDTH / 2 + 10, WINDOWHEIGHT / 2, 200, "center")
 
