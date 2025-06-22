@@ -4,7 +4,7 @@ Handball = {}
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
-local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen
+local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen, timer, curr_time
 
 local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30) 
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
@@ -42,6 +42,11 @@ function Handball.init()
 
     -- flag for loss
     lose = false
+
+    -- adding timer for certain events
+    timer = 20
+
+    curr_time = 0
 
     -- endScreen
     endScreen = false
@@ -161,6 +166,8 @@ function Handball.handball(dt)
         if score > handball_highscore then
             handball_highscore = score
         end
+
+        curr_time = curr_time + dt
     
 
         -- handle end screen
@@ -195,6 +202,16 @@ function Handball.isGameOver()
     return false
 end
 
+function Handball.drawTimer(t)
+    -- find out how much time is left
+    local progress_ratio = t / timer
+
+    local angle = progress_ratio * (2 * math.pi)
+
+    -- draw timer
+    love.graphics.arc("fill", WINDOWWIDTH / 2 + 50, 50, 30, angle - (math.pi / 2), 2 * math.pi - (math.pi / 2))
+end
+
 function Handball.drawGame()
     love.graphics.setFont(font)
 
@@ -215,6 +232,9 @@ function Handball.drawGame()
 
     -- trying out dashed line
     dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT, 25);
+
+    -- draw timer
+    Handball.drawTimer(curr_time)
 
     -- score
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
