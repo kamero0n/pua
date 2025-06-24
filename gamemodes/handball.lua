@@ -16,6 +16,7 @@ local wallHeight, paddle, balls, ball_velocities, score, lose, max_speed, endScr
 local events
 local ogPaddleHeight = 70
 local ogPaddleSpeed = 500
+local obstaclesActive = false
 
 local obstacles = {}
 local spawnArea = {}
@@ -60,20 +61,23 @@ function Handball.init()
 
     -- events 
     events = {
-        {Handball.long_paddle, 20},
-        {Handball.fast_paddle, 20},
-        {Handball.mult_balls, 0}
+        {Handball.long_paddle, 30},
+        {Handball.fast_paddle, 30},
+        {Handball.mult_balls, 0},
+        {Handball.obstacles_event, 30}
     }
 
     spawnArea = {
         minX = paddle.x + paddle.width + 30,
-        minY = wallHeight + 10,
+        minY = wallHeight + 30,
         maxX = WINDOWWIDTH - 40,
         maxY = WINDOWHEIGHT - wallHeight - 30
     }
 
     -- endScreen
     endScreen = false
+
+    Handball.spawn_obstacle()
 end
 
 function Handball.resetEvents()
@@ -86,7 +90,13 @@ function Handball.resetEvents()
    if paddle.speed ~= ogPaddleSpeed then
         paddle.speed = ogPaddleSpeed
    end
-    
+
+   -- reset obstacles
+   if obstaclesActive then
+        obstacles = {}
+
+        obstaclesActive = false
+   end
 end
 
 function Handball.reset()
@@ -119,6 +129,9 @@ function Handball.reset()
     -- reset event timer
     eventTimer = 0
     curr_time = 0
+
+    -- ensure obstacles are empty
+    obstacles = {}
 
     -- endScreen
     endScreen = false
@@ -184,6 +197,22 @@ function Handball.handball(dt)
                 goto continue
             end
 
+            -- check for collisions w/ other paddles
+            if obstaclesActive then
+                if #obstacles > 0 then 
+                    for j = #obstacles, 1, -1 do
+                        local collided = Handball.check_collision(ball, obstacles[j])
+
+                        if collided == true then
+                            Handball.handle_obstacle_collision(ball, ball_velocity, obstacles[j])
+                            TEsound.play(wallHits, "static")
+
+                            break
+                        end
+                    end
+                end
+            end
+
             -- check for collisions w/ paddle
             if lose == false and endScreen ~= true then
                 if ball.x < paddle.x + ball.width then
@@ -217,7 +246,6 @@ function Handball.handball(dt)
 
                                 TEsound.play(speedIncrease, "static")
                             end
-
 
                             local randomChoice = math.random(1, #events)
                             
@@ -326,9 +354,12 @@ function Handball.drawGame()
     end
 
     -- draw obstacle
-    -- for i=#obstacles, 1, -1 do
-    --     love.graphics.rectangle("line", math.random(spawnArea.minX, spawnArea.maxX), math.random(spawnArea.minY, spawnArea.maxY), i.width, i.height)
-    -- end
+    if obstaclesActive then
+        for i = #obstacles, 1, -1 do
+            local obstacle = obstacles[i]
+            love.graphics.rectangle("fill", obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+        end
+    end
 
     -- score
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 300, "left")
@@ -388,18 +419,67 @@ function Handball.mult_balls()
     end
 end
 
+function Handball.obstacles_event()
+    obstaclesActive = true
+    obstacles = {} -- clear existing obstacles
+    Handball.spawn_obstacle()
+end
+
 function Handball.spawn_obstacle()
-    local numObstacles = math.random(2, 4)
+    if #obstacles == 0 then
+        local numObstacles = math.random(3, 6)
 
-    for i = 1, 1 do
-        local newObstacle = {
-            x = 100, 
-            y = 200,
-            width = 20,
-            height = 40,
-            angle = 0
-        }
+        for i = 1, numObstacles do
+            local newObstacle = {
+                x = math.random(spawnArea.minX, spawnArea.maxX), 
+                y = math.random(spawnArea.minY, spawnArea.maxY),
+                width = math.random(40, 90),
+                height = math.random(40, 90)
+            }
 
-        table.insert(obstacles, newObstacle)
+            table.insert(obstacles, newObstacle)
+        end
+    end
+end
+
+function Handball.check_collision(a, b)
+    local a_left = a.x
+    local a_right = a.x + a.width
+    local a_top = a.y
+    local a_bottom = a.y + a.height
+
+    local b_left = b.x
+    local b_right = b.x + b.width
+    local b_top = b.y
+    local b_bottom = b.y + b.height
+
+    return a_right > b_left 
+        and a_left < b_right 
+        and a_bottom > b_top
+        and a_top < b_bottom
+end
+
+function Handball.handle_obstacle_collision(ball, ball_velocity, obstacle)
+    -- calculate overlap
+    local overlapX = math.min(ball.x + ball.width - obstacle.x, obstacle.x + obstacle.width - ball.x)
+    local overlapY = math.min(ball.y + ball.height - obstacle.y, obstacle.y + obstacle.height - ball.y)
+
+    -- push ball out on the axis w/ smallest distance
+    if overlapX < overlapY then
+        if ball.x < obstacle.x then
+            ball.x = obstacle.x - ball.width -- push left
+        else
+            ball.x = obstacle.x + obstacle.width -- push right
+        end
+
+        ball_velocity.x = ball_velocity.x * (-1)
+    else
+        if ball.y < obstacle.y then
+            ball.y = obstacle.y - ball.height -- push up
+        else
+            ball.y = obstacle.y + obstacle.height -- push down
+        end
+
+        ball_velocity.y = ball_velocity.y * (-1)
     end
 end
