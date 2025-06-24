@@ -1,13 +1,24 @@
 
 Handball = {}
 
+-- window stuff
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
+-- font
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
-local wallHeight, paddle, ball, ball_velocity, score, lose, max_speed, endScreen, timer, curr_time
-
 local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30) 
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
+
+-- local variables
+local wallHeight, paddle, balls, ball_velocities, score, lose, max_speed, endScreen, eventTimer, curr_time
+
+-- random events
+local events
+local ogPaddleHeight = 70
+local ogPaddleSpeed = 500
+
+local obstacles = {}
+local spawnArea = {}
 
 function Handball.init()
     -- wall stuff
@@ -23,16 +34,16 @@ function Handball.init()
     }
 
     -- ball stuff
-    ball = {
-        x = WINDOWWIDTH / 2,
+    balls = {
+        {x = WINDOWWIDTH / 2,
         y = 400,
         width = 10,
-        height = 10
+        height = 10}
     }
 
-    ball_velocity = {
-        x = -200,
-        y = -200
+    ball_velocities = {
+        {x = -200,
+        y = -200}
     }
 
     max_speed = 700
@@ -43,13 +54,39 @@ function Handball.init()
     -- flag for loss
     lose = false
 
-    -- adding timer for certain events
-    timer = 20
-
+    -- timers for random events
+    eventTimer = 0
     curr_time = 0
+
+    -- events 
+    events = {
+        {Handball.long_paddle, 20},
+        {Handball.fast_paddle, 20},
+        {Handball.mult_balls, 0}
+    }
+
+    spawnArea = {
+        minX = paddle.x + paddle.width + 30,
+        minY = wallHeight + 10,
+        maxX = WINDOWWIDTH - 40,
+        maxY = WINDOWHEIGHT - wallHeight - 30
+    }
 
     -- endScreen
     endScreen = false
+end
+
+function Handball.resetEvents()
+   -- reset height
+    if paddle.height ~= ogPaddleHeight then
+        paddle.height = ogPaddleHeight
+   end
+
+   -- reset speed
+   if paddle.speed ~= ogPaddleSpeed then
+        paddle.speed = ogPaddleSpeed
+   end
+    
 end
 
 function Handball.reset()
@@ -61,17 +98,27 @@ function Handball.reset()
     paddle.speed = 500
 
     -- ball stuff
-    ball.x = WINDOWWIDTH / 2
-    ball.y = math.random(10, WINDOWHEIGHT - wallHeight)
+    balls = {
+        {x = WINDOWWIDTH / 2,
+        y = math.random(10, WINDOWHEIGHT - wallHeight),
+        width = 10,
+        height = 10}
+    }
 
-    ball_velocity.x = -200
-    ball_velocity.y = -200
+    ball_velocities = {
+        {x = -200,
+        y = -200}
+    }
 
     -- track score
     score = 0
 
     -- flag for loss
     lose = false
+
+    -- reset event timer
+    eventTimer = 0
+    curr_time = 0
 
     -- endScreen
     endScreen = false
@@ -96,89 +143,125 @@ function Handball.handball(dt)
             paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
         end
 
-        -- ball movements
-        ball.x = ball.x + ball_velocity.x * dt--ballSpeed * ballXDir * dt
-        ball.y = ball.y + ball_velocity.y * dt--ballSpeed * ballYDir * dt
+        for i = #balls, 1, -1 do 
+            local ball = balls[i]
+            local ball_velocity = ball_velocities[i]
 
-        -- y pos ball wall constraints
-        if ball.y > (WINDOWHEIGHT - wallHeight) - ball.height then
-            ball_velocity.y = ball_velocity.y * (-1)
-            ball.y = (WINDOWHEIGHT - wallHeight) - ball.height
+            -- move ball
+            ball.x = ball.x + ball_velocity.x * dt--ballSpeed * ballXDir * dt
+            ball.y = ball.y + ball_velocity.y * dt--ballSpeed * ballYDir * dt
 
-            TEsound.play(wallHits, "static")
-        elseif ball.y < wallHeight then
-            ball_velocity.y = ball_velocity.y * (-1)
-            ball.y = wallHeight
+            -- y pos ball wall constraints
+            if ball.y > (WINDOWHEIGHT - wallHeight) - ball.height then
+                ball_velocity.y = ball_velocity.y * (-1)
+                ball.y = (WINDOWHEIGHT - wallHeight) - ball.height
 
-            TEsound.play(wallHits, "static")
-        end
+                TEsound.play(wallHits, "static")
+            elseif ball.y < wallHeight then
+                ball_velocity.y = ball_velocity.y * (-1)
+                ball.y = wallHeight
 
-        -- x pos ball wall constraints
-        if ball.x > (WINDOWWIDTH - 30) - ball.width then
-            ball_velocity.x = ball_velocity.x * (-1)
-            ball.x = (WINDOWWIDTH - 30) - ball.width
+                TEsound.play(wallHits, "static")
+            end
 
-            TEsound.play(wallHits, "static")
-        end
+            -- x pos ball wall constraints
+            if ball.x > (WINDOWWIDTH - 30) - ball.width then
+                ball_velocity.x = ball_velocity.x * (-1)
+                ball.x = (WINDOWWIDTH - 30) - ball.width
 
-        -- check for collisions w/ paddle
-        if lose == false and endScreen ~= true then
-            if ball.x < paddle.x + ball.width then
-                -- y collision check
-                if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
-                    ball_velocity.x = ball_velocity.x * (-1)
-                    ball.x = paddle.x + paddle.width
+                TEsound.play(wallHits, "static")
+            end
 
-                    score = score + 1
-                    TEsound.play(scoreDing, "static", 0.5)
+            -- handle if ball went off left side
+            if ball.x < -ball.width then
+                table.remove(balls, i)
+                table.remove(ball_velocities, i)
 
-                    TEsound.play(paddleHit, "static")
-
-                    -- every five hits increase the speed of the ball ... max speed at 800
-                    if score % 5 == 0 and score ~= 0 then
-                        if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
-                            if ball_velocity.x < 0 then
-                                ball_velocity.x = ball_velocity.x - 50.0
-                            else
-                                ball_velocity.x = ball_velocity.x + 50.0
-                            end
-
-                            TEsound.play(speedIncrease, "static")
-                        end
-
-                        if ball_velocity.y <= max_speed and ball_velocity.y >= -max_speed then
-                            if ball_velocity.y < 0 then
-                                ball_velocity.y = ball_velocity.y - 50.0
-                            else
-                                ball_velocity.y = ball_velocity.y + 50.0
-                            end
-
-                            TEsound.play(speedIncrease, "static")
-                        end
-                    end
-
-                else
+                if #balls == 0 then
                     endScreen = true
                 end
+
+                goto continue
             end
+
+            -- check for collisions w/ paddle
+            if lose == false and endScreen ~= true then
+                if ball.x < paddle.x + ball.width then
+                    -- y collision check
+                    if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
+                        ball_velocity.x = ball_velocity.x * (-1)
+                        ball.x = paddle.x + paddle.width
+
+                        score = score + 1
+                        TEsound.play(scoreDing, "static", 0.5)
+                        TEsound.play(paddleHit, "static")
+
+                        -- every five hits increase the speed of the ball ... max speed at 800 AND have a special event start
+                        if score % 5 == 0 and score ~= 0 then
+                            if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
+                                if ball_velocity.x < 0 then
+                                    ball_velocity.x = ball_velocity.x - 50.0
+                                else
+                                    ball_velocity.x = ball_velocity.x + 50.0
+                                end
+
+                                TEsound.play(speedIncrease, "static")
+                            end
+
+                            if ball_velocity.y <= max_speed and ball_velocity.y >= -max_speed then
+                                if ball_velocity.y < 0 then
+                                    ball_velocity.y = ball_velocity.y - 50.0
+                                else
+                                    ball_velocity.y = ball_velocity.y + 50.0
+                                end
+
+                                TEsound.play(speedIncrease, "static")
+                            end
+
+
+                            local randomChoice = math.random(1, #events)
+                            
+                            -- only have an event play if it's non timed or no timer is currently active
+                            if events[randomChoice][2] == 0 or eventTimer == 0 then
+                                events[randomChoice][1]()
+
+                                if events[randomChoice][2] > 0 then
+                                    eventTimer = events[randomChoice][2]
+                                end
+                            end
+                        end
+
+                    else
+                        table.remove(balls, i)
+                        table.remove(ball_velocities, i)
+
+                        if #balls == 0 then
+                            endScreen = true
+                        end
+                    end
+                end
+            end
+
+            ::continue::
         end
 
+        -- if there is a random event playing and eventTimer is > 0, set up curr_time... otherwise, make curr_time = 0
+        if eventTimer > 0 then
+            curr_time = curr_time + dt
+
+            if curr_time >= eventTimer then
+                Handball.resetEvents()
+                eventTimer = 0
+                curr_time = 0
+            end
+        else
+            curr_time = 0
+        end
+
+        -- set the high score
         if score > handball_highscore then
             handball_highscore = score
         end
-
-        curr_time = curr_time + dt
-    
-
-        -- handle end screen
-        if endScreen == true then
-            if ball.x < 0 then
-                ball_velocity.x = 0
-                ball_velocity.y = 0
-            end
-        end
-
-
 end
 
 function Handball.keypressed(key)
@@ -204,12 +287,14 @@ end
 
 function Handball.drawTimer(t)
     -- find out how much time is left
-    local progress_ratio = t / timer
+    local progress_ratio = t / eventTimer
 
     local angle = progress_ratio * (2 * math.pi)
 
     -- draw timer
-    love.graphics.arc("fill", WINDOWWIDTH / 2 + 50, 50, 30, angle - (math.pi / 2), 2 * math.pi - (math.pi / 2))
+   if progress_ratio ~= 1 then
+        love.graphics.arc("fill", WINDOWWIDTH / 2 + 50, 50, 30, angle - (math.pi / 2), 2 * math.pi - (math.pi / 2))
+   end
 end
 
 function Handball.drawGame()
@@ -228,16 +313,25 @@ function Handball.drawGame()
     love.graphics.rectangle("fill", WINDOWWIDTH - 30, 0, wallHeight, WINDOWHEIGHT);
 
     -- ball time
-    love.graphics.rectangle("fill", ball.x, ball.y, ball.width, ball.height);
+    for _, ball in ipairs(balls) do
+        love.graphics.rectangle("fill", ball.x, ball.y, ball.width, ball.height);
+    end
 
     -- trying out dashed line
     dashLine(WINDOWWIDTH / 2, 0, WINDOWWIDTH / 2, WINDOWHEIGHT, 25);
 
-    -- draw timer
-    Handball.drawTimer(curr_time)
+    -- draw timer only if there is an event going on
+    if eventTimer ~= 0 then
+        Handball.drawTimer(curr_time)
+    end
+
+    -- draw obstacle
+    -- for i=#obstacles, 1, -1 do
+    --     love.graphics.rectangle("line", math.random(spawnArea.minX, spawnArea.maxX), math.random(spawnArea.minY, spawnArea.maxY), i.width, i.height)
+    -- end
 
     -- score
-    love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 100, "left")
+    love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 300, "left")
 
     if endScreen == true then
         -- fill up the background to be black! with some opacity
@@ -262,5 +356,50 @@ function Handball.drawGame()
         love.graphics.setFont(smallerFont)
         love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 300, WINDOWHEIGHT / 2 + 150, 400, "left")
         love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 150, 400, "left")
+    end
+end
+
+function Handball.long_paddle()
+    paddle.height = paddle.height + 30
+end
+
+function Handball.fast_paddle()
+    paddle.speed = paddle.speed + 200
+end
+
+function Handball.mult_balls()
+    local numBalls = math.random(2, 4) -- 2-4 balls max
+
+    for i = 1, numBalls do
+        local newBall = {
+            x = WINDOWWIDTH / 2 + math.random(-50, 50),
+            y = math.random(wallHeight + 20, WINDOWHEIGHT - wallHeight - 20),
+            width = 10,
+            height = 10
+        }
+
+        local newVelocity = {
+            x = math.random(-400, 400),
+            y = math.random(-300, 300)
+        }
+
+        table.insert(balls, newBall)
+        table.insert(ball_velocities, newVelocity)
+    end
+end
+
+function Handball.spawn_obstacle()
+    local numObstacles = math.random(2, 4)
+
+    for i = 1, 1 do
+        local newObstacle = {
+            x = 100, 
+            y = 200,
+            width = 20,
+            height = 40,
+            angle = 0
+        }
+
+        table.insert(obstacles, newObstacle)
     end
 end
