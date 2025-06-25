@@ -1,4 +1,6 @@
 
+require 'events/lilDudes'
+
 Handball = {}
 
 -- window stuff
@@ -364,6 +366,9 @@ function Handball.drawGame()
     -- score
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 300, "left")
 
+    -- lil dude
+    LilDudes.drawDude()
+
     if endScreen == true then
         -- fill up the background to be black! with some opacity
         love.graphics.setColor(0, 0, 0, 0.5)
@@ -394,8 +399,8 @@ function Handball.long_paddle()
     paddle.height = paddle.height + 30
 end
 
-function Handball.fast_paddle()
-    paddle.speed = paddle.speed + 200
+function Handball.fast_paddle() -- REALLY fast
+    paddle.speed = paddle.speed + 400
 end
 
 function Handball.mult_balls()
