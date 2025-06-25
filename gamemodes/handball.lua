@@ -222,7 +222,7 @@ function Handball.handball(dt)
             if lose == false and endScreen ~= true then
                 if ball.x < paddle.x + ball.width then
                     -- y collision check
-                    if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
+                    if(ball.y + ball.height >= paddle.y ) and (ball.y <= paddle.y + paddle.height) then
                         ball_velocity.x = ball_velocity.x * (-1)
                         ball.x = paddle.x + paddle.width
 
@@ -490,4 +490,8 @@ function Handball.handle_obstacle_collision(ball, ball_velocity, obstacle)
 
         ball_velocity.y = ball_velocity.y * (-1)
     end
+end
+
+function Handball.get_paddle()
+    return paddle
 end

@@ -53,7 +53,16 @@ function LilDudes.updateTime(time)
 
     lilGuy.x = lilGuy.x + (lilGuy.animSpeed * time) * lilGuy.direction
 
+    -- hits the right wall
     if lilGuy.x > WINDOWWIDTH - 30 - lilGuy.width then
         lilGuy.direction = lilGuy.direction * (-1)
+    end
+
+    -- hits the paddle
+    if lilGuy.x < Handball.get_paddle().x + Handball.get_paddle().width then
+        if lilGuy.y + lilGuy.height >= Handball.get_paddle().y and
+            lilGuy.y <= Handball.get_paddle().y + Handball.get_paddle().height then
+                lilGuy.direction = lilGuy.direction * (-1)
+        end
     end
 end
