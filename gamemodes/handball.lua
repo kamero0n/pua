@@ -158,6 +158,9 @@ function Handball.handball(dt)
             paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
         end
 
+        -- track lil guy
+        LilDudes.updateTime(dt)
+
         for i = #balls, 1, -1 do 
             local ball = balls[i]
             local ball_velocity = ball_velocities[i]
