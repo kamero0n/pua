@@ -68,7 +68,10 @@ end
 
 
 function love.update(dt)
-    
+    if game_state == "menu" then
+        LilDudes.update(dt)
+    end
+
     if game_state == 'handball' then
         Handball.handball(dt)
     elseif game_state == 'tennis_1p' then
@@ -151,6 +154,11 @@ function drawMenu()
 
         love.graphics.printf(menus[i], menu.x, startY + fontHeight * (i - 1), 300, "center")
     end
+
+    -- draw bottom flooring
+    love.graphics.rectangle("fill", 0, WINDOWHEIGHT - 10, WINDOWWIDTH, 10)
+
+    LilDudes.drawtheONEGuy()
 
 end
 
