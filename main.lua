@@ -21,7 +21,7 @@ local menus = {
 local selected_menu_item = 1
 
 -- font stuff
-font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 70) 
 local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 -- shader stuff
@@ -29,6 +29,11 @@ local crtShader
 
 -- high scores
 handball_highscore = 0
+
+
+-- menu stuff
+local titleY = 1
+local time = 0
 
 function love.load()
     -- set title window
@@ -70,6 +75,9 @@ end
 function love.update(dt)
     if game_state == "menu" then
         LilDudes.update(dt)
+
+        time = time + dt
+        titleY = 10 * math.sin(time)
     end
 
     if game_state == 'handball' then
@@ -127,7 +135,6 @@ function drawMenu()
     -- local constants for tuning
     local startX = WINDOWWIDTH / 2 
     local startY = WINDOWHEIGHT / 2 - (fontHeight * (#menus / 2))
-    local titleY = 20
     local menu = {
         x = 260
     }
@@ -142,7 +149,7 @@ function drawMenu()
     -- draw game title
     love.graphics.setColor(1, 1, 1, 1)
 
-    love.graphics.printf("PONG", startX - 90, titleY, font:getWidth("PONG"), "center")
+    love.graphics.printf("PONG", startX - 130, titleY + 10, font:getWidth("PONG"), "center")
 
     love.graphics.setFont(smallFont)
 
