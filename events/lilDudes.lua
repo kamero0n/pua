@@ -2,67 +2,137 @@ LilDudes = {}
 
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
-local lilGuy = {
-    x = WINDOWWIDTH / 2 + 60,
-    y = WINDOWHEIGHT - 45,
-    width = 20,
-    height = 20,
-    time = 0,
-    walkSpeed = 4, -- frequency
-    legSwing = 2, -- X amplitude
-    stepHeight = 2, -- Y amplitude
-    bobHeight = 2,
-    direction = 1, -- going right
-    animSpeed = 40 -- pixels/sec
-}
+lilGuys = {}
 
+-- example of a lil guy
+-- local lilGuy = {
+--     x = WINDOWWIDTH / 2 + 60,
+--     y = WINDOWHEIGHT - 45,
+--     width = 20,
+--     height = 20,
+--     time = 0,
+--     walkSpeed = 4, -- frequency
+--     legSwing = 2, -- X amplitude
+--     stepHeight = 2, -- Y amplitude
+--     bobHeight = 2,
+--     direction = 1, -- going right
+--     animSpeed = 50, -- pixels/sec
+--     state = "walk" -- track current state
+-- }
 
 function LilDudes.drawDude()
-    -- set the canvas color to white
-    love.graphics.setColor(1, 1, 1, 1)
+    for i = #lilGuys, 1, -1 do
+        local lilGuy = lilGuys[i]
 
-    -- draw a small rectangle (this is the body)
-    local bodyBob = lilGuy.bobHeight * math.cos(lilGuy.time * lilGuy.walkSpeed * 2)
-    love.graphics.rectangle("fill", lilGuy.x, lilGuy.y + bodyBob, lilGuy.width, lilGuy.height)
+        -- set the canvas color to white
+        love.graphics.setColor(1, 1, 1, 1)
 
-    -- draw legs? left leg!
-    local leftLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed)
-    local leftLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed)))
-    love.graphics.rectangle("fill", lilGuy.x + 3 + leftLegXOffset, lilGuy.y + lilGuy.height + leftLegYOffset, 5, 15)
 
-    -- right leg!
-    local rightLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed + math.pi)
-    local rightLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed + math.pi)))
-    love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 8 + rightLegXOffset, lilGuy.y + lilGuy.height + rightLegYOffset, 5, 15)
+        if lilGuy.state == "walk" then
+        -- draw a small rectangle (this is the body)
+        local bodyBob = lilGuy.bobHeight * math.cos(lilGuy.time * lilGuy.walkSpeed * 2)
+        love.graphics.rectangle("fill", lilGuy.x, lilGuy.y + bodyBob, lilGuy.width, lilGuy.height)
 
-    -- set the canvas color to black
-    love.graphics.setColor(0, 0, 0, 1)
+        -- draw legs? left leg!
+        local leftLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed)
+        local leftLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed)))
+        love.graphics.rectangle("fill", lilGuy.x + 3 + leftLegXOffset, lilGuy.y + lilGuy.height + leftLegYOffset, 4, 15)
 
-    -- draw eyes (add body bob here so the eyes move w/ the head)
-    if lilGuy.direction == 1 then
-        love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 5, lilGuy.y + 10 + bodyBob, 3, 5)
-        love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 10, lilGuy.y + 10 + bodyBob, 3, 5)
-    else
-        love.graphics.rectangle("fill", lilGuy.x + 2, lilGuy.y + 10 + bodyBob, 3, 5)
-        love.graphics.rectangle("fill", lilGuy.x + 8, lilGuy.y + 10 + bodyBob, 3, 5)
+        -- right leg!f
+        local rightLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed + math.pi)
+        local rightLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed + math.pi)))
+        love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 8 + rightLegXOffset, lilGuy.y + lilGuy.height + rightLegYOffset, 4, 15)
+
+        -- set the canvas color to black
+        love.graphics.setColor(0, 0, 0, 1)
+
+        -- draw eyes (add body bob here so the eyes move w/ the head)
+        if lilGuy.direction == 1 then
+            love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 5, lilGuy.y + 10 + bodyBob, 3, 5)
+            love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 10, lilGuy.y + 10 + bodyBob, 3, 5)
+        else
+            love.graphics.rectangle("fill", lilGuy.x + 2, lilGuy.y + 10 + bodyBob, 3, 5)
+            love.graphics.rectangle("fill", lilGuy.x + 8, lilGuy.y + 10 + bodyBob, 3, 5)
+        end
+
+        elseif lilGuy.state == "collapsed" then
+            -- draw body
+            love.graphics.rectangle("fill", lilGuy.x, lilGuy.y + lilGuy.height, lilGuy.width, lilGuy.height)
+
+            -- no legs!
+
+            -- set canvas color to black
+            love.graphics.setColor(0, 0, 0, 1)
+            if lilGuy.direction == 1 then
+                love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 5, lilGuy.y + lilGuy.height + 10, 3, 2)
+                love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 10, lilGuy.y + lilGuy.height + 10, 3, 2)
+            else
+                love.graphics.rectangle("fill", lilGuy.x + 2, lilGuy.y + lilGuy.height + 10, 3, 2)
+                love.graphics.rectangle("fill", lilGuy.x + 8, lilGuy.y + lilGuy.height + 10, 3, 2)
+            end
+
+        end
     end
 end
 
-function LilDudes.updateTime(time)
-    lilGuy.time = lilGuy.time + time
+function LilDudes.update(time)
+    for i = #lilGuys, 1, -1 do
+        local lilGuy = lilGuys[i]
 
-    lilGuy.x = lilGuy.x + (lilGuy.animSpeed * time) * lilGuy.direction
+        lilGuy.time = lilGuy.time + time
 
-    -- hits the right wall
-    if lilGuy.x > WINDOWWIDTH - 30 - lilGuy.width then
-        lilGuy.direction = lilGuy.direction * (-1)
-    end
+        if lilGuy.state == "walk" then
+            lilGuy.x = lilGuy.x + (lilGuy.animSpeed * time) * lilGuy.direction
+        elseif lilGuy.state == "collapsed" then
+            lilGuy.x = lilGuy.x 
+        end
 
-    -- hits the paddle
-    if lilGuy.x < Handball.get_paddle().x + Handball.get_paddle().width then
-        if lilGuy.y + lilGuy.height >= Handball.get_paddle().y and
-            lilGuy.y <= Handball.get_paddle().y + Handball.get_paddle().height then
-                lilGuy.direction = lilGuy.direction * (-1)
+        -- hits the right wall
+        if lilGuy.x > WINDOWWIDTH - 30 - lilGuy.width then
+            TEsound.play(paddleGuyHit, "static")
+
+            lilGuy.direction = lilGuy.direction * (-1)
+        end
+
+        -- hits the paddle
+        if Handball.check_collision(Handball.get_paddle(), lilGuy) then
+            TEsound.play(paddleGuyHit, "static")
+
+            lilGuy.direction = lilGuy.direction * (-1)
         end
     end
+end
+
+function LilDudes.dude_event()
+    local numGuys = math.random(4, 8)
+    local dir = {
+        -1, 1
+    }
+
+    for i = 1, numGuys do
+        local newLilGuy = {
+            x = math.random(Handball.get_paddle().x + Handball.get_paddle().width + 20, WINDOWWIDTH - 50 - 20),
+            y = WINDOWHEIGHT - 45,
+            width = 20,
+            height = 20,
+            time = 0,
+            walkSpeed = math.random(3, 6), -- frequency
+            legSwing = 2, -- X amplitude
+            stepHeight = 2, -- Y amplitude
+            bobHeight = 2,
+            direction = dir[math.random(#dir)], -- going right or left?
+            animSpeed = math.random(40, 50), -- pixels/sec
+            state = "walk" -- track current states
+        }
+
+        table.insert(lilGuys, newLilGuy)
+    end
+end
+
+function LilDudes.clear_lilGuys()
+    lilGuys = {}
+end
+
+function LilDudes.get_lilGuys()
+    return lilGuys
 end

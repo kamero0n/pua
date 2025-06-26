@@ -19,6 +19,7 @@ local events
 local ogPaddleHeight = 70
 local ogPaddleSpeed = 500
 local obstaclesActive = false
+local lilGuysActive = false
 
 local obstacles = {}
 local spawnArea = {}
@@ -63,14 +64,15 @@ function Handball.init()
 
     -- events 
     events = {
-        {Handball.long_paddle, 30},
-        {Handball.fast_paddle, 30},
+        {Handball.long_paddle, 20},
+        {Handball.fast_paddle, 20},
         {Handball.mult_balls, 0},
-        {Handball.obstacles_event, 30}
+        {Handball.obstacles_event, 30},
+        {Handball.lilGuys_event, 20}
     }
 
     spawnArea = {
-        minX = paddle.x + paddle.width + 30,
+        minX = paddle.x + paddle.width + 50,
         minY = wallHeight + 30,
         maxX = WINDOWWIDTH - 40,
         maxY = WINDOWHEIGHT - wallHeight - 30
@@ -98,6 +100,13 @@ function Handball.resetEvents()
         obstacles = {}
 
         obstaclesActive = false
+   end
+
+   -- reset lil guys
+   if lilGuysActive then
+        LilDudes.clear_lilGuys()
+
+        lilGuysActive = false
    end
 end
 
@@ -135,6 +144,8 @@ function Handball.reset()
     -- ensure obstacles are empty
     obstacles = {}
 
+    LilDudes.clear_lilGuys()
+
     -- endScreen
     endScreen = false
 end
@@ -159,7 +170,7 @@ function Handball.handball(dt)
         end
 
         -- track lil guy
-        LilDudes.updateTime(dt)
+        LilDudes.update(dt)
 
         for i = #balls, 1, -1 do 
             local ball = balls[i]
@@ -214,6 +225,23 @@ function Handball.handball(dt)
 
                             break
                         end
+                    end
+                end
+            end
+
+            -- check for collisions w/ lil guy
+            if lilGuysActive then
+                for i = #LilDudes.get_lilGuys(), 1, -1 do
+                    local hitlilGuy = Handball.check_collision(ball, LilDudes.get_lilGuys()[i])
+
+                    if hitlilGuy and LilDudes.get_lilGuys()[i].state ~= "collapsed" then
+                        Handball.handle_obstacle_collision(ball, ball_velocity, LilDudes.get_lilGuys()[i])
+
+                        TEsound.play(lilGuyHit, "static")
+                        LilDudes.get_lilGuys()[i].state = "collapsed"
+                        score = score - 1
+
+                        break
                     end
                 end
             end
@@ -370,7 +398,9 @@ function Handball.drawGame()
     love.graphics.printf(score, (WINDOWWIDTH / 2) - 120, 20, 300, "left")
 
     -- lil dude
-    LilDudes.drawDude()
+    if lilGuysActive then
+        LilDudes.drawDude()
+    end
 
     if endScreen == true then
         -- fill up the background to be black! with some opacity
@@ -407,7 +437,7 @@ function Handball.fast_paddle() -- REALLY fast
 end
 
 function Handball.mult_balls()
-    local numBalls = math.random(2, 4) -- 2-4 balls max
+    local numBalls = math.random(2, 5) -- 2-5 balls max
 
     for i = 1, numBalls do
         local newBall = {
@@ -433,9 +463,16 @@ function Handball.obstacles_event()
     Handball.spawn_obstacle()
 end
 
+function Handball.lilGuys_event()
+    lilGuysActive = true
+
+    LilDudes.clear_lilGuys()
+    LilDudes.dude_event()
+end
+
 function Handball.spawn_obstacle()
     if #obstacles == 0 then
-        local numObstacles = math.random(3, 6)
+        local numObstacles = math.random(4, 8)
 
         for i = 1, numObstacles do
             local newObstacle = {

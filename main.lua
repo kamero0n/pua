@@ -60,6 +60,9 @@ function love.load()
 
     selectDing = "assets/audio/sound_effects/select.wav"
 
+    lilGuyHit = "assets/audio/sound_effects/lilGuyHit.wav"
+    paddleGuyHit = "assets/audio/sound_effects/paddleLilGuyHit.wav"
+
     TEsound.volume("all", .3)
 end
 
