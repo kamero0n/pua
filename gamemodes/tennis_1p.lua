@@ -2,8 +2,6 @@ Tennis_1P = {}
 
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
-
-
 local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
 local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose
 

@@ -16,7 +16,7 @@ local game_state = 'menu'
 local prev_state = game_state
 local menus = {
     'Handball',
-   -- 'Tennis (1P)',
+   'Tennis (1P)',
     'Quit'
 }
 local selected_menu_item = 1
@@ -102,6 +102,8 @@ function love.update(dt)
     -- check if handball lost
     if Handball.isGameOver() then
         game_state = "menu"
+
+        Handball.reset()
     end
 
     if game_state == "menu" and prev_state == "handball" then
