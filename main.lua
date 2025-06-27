@@ -75,7 +75,7 @@ function love.load()
 
     TEsound.volume("all", .2)
 
-    TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.3)
+    TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.5)
 end
 
 

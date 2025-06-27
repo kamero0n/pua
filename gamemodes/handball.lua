@@ -1,5 +1,6 @@
 
 require 'events/lilDudes'
+require 'events/closingWall'
 
 Handball = {}
 
@@ -19,8 +20,9 @@ local time = 0
 local events
 local ogPaddleHeight = 70
 local ogPaddleSpeed = 500
-local obstaclesActive = false
+local obstaclesActive = false -- is this the best way to approach this stuff? no... but urm UHUEOFHUOEHW
 local lilGuysActive = false
+local closingWallActive = false
 
 local obstacles = {}
 local spawnArea = {}
@@ -72,7 +74,8 @@ function Handball.init()
         {Handball.fast_paddle, 20},
         {Handball.mult_balls, 0},
         {Handball.obstacles_event, 30},
-        {Handball.lilGuys_event, 20}
+        {Handball.lilGuys_event, 20},
+        {Handball.closing_wall, 10}
     }
 
     spawnArea = {
@@ -112,6 +115,12 @@ function Handball.resetEvents()
 
         lilGuysActive = false
    end
+
+   if closingWallActive then
+        ClosingWall.reset_wall_pos()
+
+        closingWallActive = false
+   end
 end
 
 function Handball.reset()
@@ -148,13 +157,18 @@ function Handball.reset()
     -- ensure obstacles are empty
     obstacles = {}
 
+    -- clear the lil guys
     LilDudes.clear_lilGuys()
+
+    -- make sure reset events
+    Handball.resetEvents()
 
     -- endScreen
     endScreen = false
 
     -- end music
     setEndMusic = false
+    TEsound.stop("endMenu")
 end
 
 function Handball.handball(dt)
@@ -177,7 +191,14 @@ function Handball.handball(dt)
         end
 
         -- track lil guy
-        LilDudes.update(dt)
+        if lilGuysActive then
+            LilDudes.update(dt)
+        end
+
+        -- update moving wall
+        if closingWallActive then
+            ClosingWall.update(dt)
+        end
 
         for i = #balls, 1, -1 do 
             local ball = balls[i]
@@ -201,11 +222,17 @@ function Handball.handball(dt)
             end
 
             -- x pos ball wall constraints
-            if ball.x > (WINDOWWIDTH - 30) - ball.width then
+            if ball.x > (WINDOWWIDTH - 30) - ball.width and closingWallActive ~= true then
                 ball_velocity.x = ball_velocity.x * (-1)
                 ball.x = (WINDOWWIDTH - 30) - ball.width
 
                 TEsound.play(wallHits, "static")
+            elseif closingWallActive == true then
+                local collided = Handball.check_collision(ball, ClosingWall.get_wall())
+                if collided == true then
+                    Handball.handle_obstacle_collision(ball, ball_velocity, ClosingWall.get_wall())
+                    TEsound.play(wallHits, "static")
+                end
             end
 
             -- handle if ball went off left side
@@ -266,7 +293,8 @@ function Handball.handball(dt)
                         TEsound.play(paddleHit, "static")
 
                         -- every five hits increase the speed of the ball ... max speed at 800 AND have a special event start
-                        if score % 5 == 0 and score ~= 0 then
+                        if score % 3
+                         == 0 and score ~= 0 then
                             if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
                                 if ball_velocity.x < 0 then
                                     ball_velocity.x = ball_velocity.x - 50.0
@@ -333,7 +361,7 @@ function Handball.handball(dt)
 
         -- play end music 
         if endScreen == true and setEndMusic == false then
-            TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.3)
+            TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.5)
 
             setEndMusic = true
         end
@@ -396,7 +424,9 @@ function Handball.drawGame()
     love.graphics.rectangle("fill", 0, WINDOWHEIGHT - wallHeight, WINDOWWIDTH, wallHeight);
 
     -- wall to the right will be drawn -- in the future this will be the "handball" mode
-    love.graphics.rectangle("fill", WINDOWWIDTH - 30, 0, wallHeight, WINDOWHEIGHT);
+    if closingWallActive ~= true then
+        love.graphics.rectangle("fill", WINDOWWIDTH - 30, 0, wallHeight, WINDOWHEIGHT);
+    end
 
     -- ball time
     for _, ball in ipairs(balls) do
@@ -425,6 +455,10 @@ function Handball.drawGame()
     -- lil dude
     if lilGuysActive then
         LilDudes.drawDude()
+    end
+
+    if closingWallActive then
+        ClosingWall.drawWall()
     end
 
     if endScreen == true then
@@ -556,4 +590,8 @@ end
 
 function Handball.get_paddle()
     return paddle
+end
+
+function Handball.closing_wall()
+    closingWallActive = true
 end
