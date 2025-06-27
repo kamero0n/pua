@@ -68,12 +68,14 @@ function love.load()
 
     lilGuyHit = "assets/audio/sound_effects/lilGuyHit.wav"
     paddleGuyHit = "assets/audio/sound_effects/paddleLilGuyHit.wav"
+    lilGuyStep = "assets/audio/sound_effects/lilGuyStep.wav"
 
     menuMusic = "assets/audio/music/main_menu.wav"
+    gameOverMusic = "assets/audio/music/game_over.wav"
 
-    TEsound.volume("all", .3)
+    TEsound.volume("all", .2)
 
-    TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.5)
+    TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.3)
 end
 
 
@@ -103,7 +105,7 @@ function love.update(dt)
     end
 
     if game_state == "menu" and prev_state == "handball" then
-        TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.5)
+        TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.3)
     end
 
     prev_state = game_state

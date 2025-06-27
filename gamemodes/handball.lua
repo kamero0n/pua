@@ -14,6 +14,7 @@ local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20)
 -- local variables
 local wallHeight, paddle, balls, ball_velocities, score, lose, max_speed, endScreen, eventTimer, curr_time
 
+local time = 0
 -- random events
 local events
 local ogPaddleHeight = 70
@@ -23,6 +24,9 @@ local lilGuysActive = false
 
 local obstacles = {}
 local spawnArea = {}
+
+-- audio
+local setEndMusic = false
 
 function Handball.init()
     -- wall stuff
@@ -148,6 +152,9 @@ function Handball.reset()
 
     -- endScreen
     endScreen = false
+
+    -- end music
+    setEndMusic = false
 end
 
 function Handball.handball(dt)
@@ -323,6 +330,21 @@ function Handball.handball(dt)
         if score > handball_highscore then
             handball_highscore = score
         end
+
+        -- play end music 
+        if endScreen == true and setEndMusic == false then
+            TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.3)
+
+            setEndMusic = true
+        end
+
+        -- floating UI
+        if endScreen == true then
+
+            -- update title
+            time = time + dt
+            titleY = 10 * math.sin(time)
+        end
 end
 
 function Handball.keypressed(key)
@@ -340,6 +362,9 @@ end
 
 function Handball.isGameOver()
     if lose == true then
+        TEsound.stop("endMenu")
+
+
         return true
     end
 
@@ -410,7 +435,7 @@ function Handball.drawGame()
         -- then we will add text
         love.graphics.setColor(1, 1, 1, 1) -- make text white
 
-        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 150, 200, "left")
+        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 150 + titleY, 200, "left")
 
         -- set smaller font
         love.graphics.setFont(smallFont)

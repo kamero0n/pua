@@ -64,31 +64,31 @@ function LilDudes.drawDude()
 
 
         if lilGuy.state == "walk" then
-        -- draw a small rectangle (this is the body)
-        local bodyBob = lilGuy.bobHeight * math.cos(lilGuy.time * lilGuy.walkSpeed * 2)
-        love.graphics.rectangle("fill", lilGuy.x, lilGuy.y + bodyBob, lilGuy.width, lilGuy.height)
+            -- draw a small rectangle (this is the body)
+            local bodyBob = lilGuy.bobHeight * math.cos(lilGuy.time * lilGuy.walkSpeed * 2)
+            love.graphics.rectangle("fill", lilGuy.x, lilGuy.y + bodyBob, lilGuy.width, lilGuy.height)
 
-        -- draw legs? left leg!
-        local leftLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed)
-        local leftLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed)))
-        love.graphics.rectangle("fill", lilGuy.x + 3 + leftLegXOffset, lilGuy.y + lilGuy.height + leftLegYOffset, 4, 15)
+            -- draw legs? left leg!
+            local leftLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed)
+            local leftLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed)))
+            love.graphics.rectangle("fill", lilGuy.x + 3 + leftLegXOffset, lilGuy.y + lilGuy.height + leftLegYOffset, 4, 15)
 
-        -- right leg!f
-        local rightLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed + math.pi)
-        local rightLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed + math.pi)))
-        love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 8 + rightLegXOffset, lilGuy.y + lilGuy.height + rightLegYOffset, 4, 15)
+            -- right leg!f
+            local rightLegXOffset = lilGuy.legSwing * math.sin(lilGuy.time * lilGuy.walkSpeed + math.pi)
+            local rightLegYOffset = lilGuy.stepHeight * math.abs(math.sin((lilGuy.time * lilGuy.walkSpeed + math.pi)))
+            love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 8 + rightLegXOffset, lilGuy.y + lilGuy.height + rightLegYOffset, 4, 15)
 
-        -- set the canvas color to black
-        love.graphics.setColor(0, 0, 0, 1)
+            -- set the canvas color to black
+            love.graphics.setColor(0, 0, 0, 1)
 
-        -- draw eyes (add body bob here so the eyes move w/ the head)
-        if lilGuy.direction == 1 then
-            love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 5, lilGuy.y + 10 + bodyBob, 3, 5)
-            love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 10, lilGuy.y + 10 + bodyBob, 3, 5)
-        else
-            love.graphics.rectangle("fill", lilGuy.x + 2, lilGuy.y + 10 + bodyBob, 3, 5)
-            love.graphics.rectangle("fill", lilGuy.x + 8, lilGuy.y + 10 + bodyBob, 3, 5)
-        end
+            -- draw eyes (add body bob here so the eyes move w/ the head)
+            if lilGuy.direction == 1 then
+                love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 5, lilGuy.y + 10 + bodyBob, 3, 5)
+                love.graphics.rectangle("fill", lilGuy.x + lilGuy.width - 10, lilGuy.y + 10 + bodyBob, 3, 5)
+            else
+                love.graphics.rectangle("fill", lilGuy.x + 2, lilGuy.y + 10 + bodyBob, 3, 5)
+                love.graphics.rectangle("fill", lilGuy.x + 8, lilGuy.y + 10 + bodyBob, 3, 5)
+            end
 
         elseif lilGuy.state == "collapsed" then
             -- draw body
@@ -118,6 +118,7 @@ function LilDudes.update(time)
 
         if lilGuy.state == "walk" then
             lilGuy.x = lilGuy.x + (lilGuy.animSpeed * time) * lilGuy.direction
+
         elseif lilGuy.state == "collapsed" then
             lilGuy.x = lilGuy.x 
         end
