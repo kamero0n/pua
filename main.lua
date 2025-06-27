@@ -13,6 +13,7 @@ local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
 -- game state
 local game_state = 'menu'
+local prev_state = game_state
 local menus = {
     'Handball',
    -- 'Tennis (1P)',
@@ -68,21 +69,31 @@ function love.load()
     lilGuyHit = "assets/audio/sound_effects/lilGuyHit.wav"
     paddleGuyHit = "assets/audio/sound_effects/paddleLilGuyHit.wav"
 
+    menuMusic = "assets/audio/music/main_menu.wav"
+
     TEsound.volume("all", .3)
+
+    TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.5)
 end
 
 
 function love.update(dt)
     if game_state == "menu" then
+        -- lil dude moving
         LilDudes.update(dt)
 
+        -- update title
         time = time + dt
         titleY = 10 * math.sin(time)
     end
 
     if game_state == 'handball' then
+        TEsound.stop("menu")
+
         Handball.handball(dt)
     elseif game_state == 'tennis_1p' then
+        TEsound.stop("menu")
+
         Tennis_1P.tennis(dt)
     end
 
@@ -90,6 +101,12 @@ function love.update(dt)
     if Handball.isGameOver() then
         game_state = "menu"
     end
+
+    if game_state == "menu" and prev_state == "handball" then
+        TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.5)
+    end
+
+    prev_state = game_state
 
     -- they told me to do this
     TEsound.cleanup()
