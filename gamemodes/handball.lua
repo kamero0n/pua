@@ -46,7 +46,7 @@ function Handball.init()
     -- ball stuff
     balls = {
         {x = WINDOWWIDTH / 2,
-        y = 400,
+        y =  math.random(10, WINDOWHEIGHT - wallHeight),
         width = 10,
         height = 10}
     }

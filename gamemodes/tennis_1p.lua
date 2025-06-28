@@ -1,9 +1,17 @@
 Tennis_1P = {}
 
+-- window stuff
 local WINDOWWIDTH, WINDOWHEIGHT = love.graphics.getDimensions()
 
-local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50) 
+-- font
+local font = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 50)
+local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30) 
+local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
+
+-- local vars
 local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose
+
+-- audio
 
 function Tennis_1P.init()
     -- wall stuff
@@ -28,15 +36,15 @@ function Tennis_1P.init()
 
     -- ball stuff
     ball = {
-        x = 400,
-        y = 300, 
+        x = WINDOWWIDTH / 2,
+        y = math.random(10, WINDOWHEIGHT - wallHeight), 
         width = 10,
         height = 10
     }
 
     ball_velocity = {
-        x = 300,
-        y = 300
+        x = -300,
+        y = -300
     }
 
     -- track score
