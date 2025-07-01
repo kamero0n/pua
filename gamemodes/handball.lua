@@ -37,7 +37,7 @@ function Handball.init()
     -- paddle stuff
     paddle = {
         x = 10,
-        y = 5,
+        y = WINDOWHEIGHT /2,
         width = 10,
         height = 70,
         speed = 500
@@ -128,7 +128,7 @@ function Handball.reset()
 
     -- paddle stuff
     paddle.x = 10
-    paddle.y = 5
+    paddle.y = WINDOWHEIGHT / 2
     paddle.speed = 500
 
     -- ball stuff
@@ -179,9 +179,10 @@ function Handball.handball(dt)
             paddle.y  = paddle.y  - paddle.speed * dt
         end
 
-        if love.keyboard.isDown("m") then
-            endScreen = true
-        end
+        -- debug
+        -- if love.keyboard.isDown("m") then
+        --     endScreen = true
+        -- end
 
         -- paddle constraints/limits
         if paddle.y  < wallHeight then

@@ -9,7 +9,7 @@ local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30)
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 -- local vars
-local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose
+local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose, paddleCount, target
 
 -- audio
 
@@ -20,7 +20,7 @@ function Tennis_1P.init()
     -- paddle stuff
     paddle = {
         x = 20,
-        y = 5,
+        y = WINDOWHEIGHT / 2,
         width = 10,
         height = 70,
         speed = 500
@@ -28,10 +28,10 @@ function Tennis_1P.init()
 
     paddle_ai = {
         x = WINDOWWIDTH - 20,
-        y = 5,
+        y = WINDOWHEIGHT / 2,
         width = 10,
         height = 70,
-        speed = 500
+        speed = 450
     }
 
     -- ball stuff
@@ -46,6 +46,10 @@ function Tennis_1P.init()
         x = -300,
         y = -300
     }
+
+    -- ai stuff
+    paddleCount = 0
+    target = ball.y
 
     -- track score
     score = 0
@@ -66,7 +70,7 @@ function Tennis_1P.tennis(dt)
 
     -- human paddle constraints/limits
     if paddle.y  < wallHeight then
-        paddle.y  = wallHeight
+        paddle.y = wallHeight
     elseif paddle.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
         paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
     end
@@ -91,11 +95,10 @@ function Tennis_1P.tennis(dt)
     -- AI movements
     paddle_ai.y = ball.y
 
-    -- ai paddle constraints/limits
-    if paddle_ai.y  < wallHeight then
-        paddle_ai.y  = wallHeight
-    elseif paddle_ai.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
+    if paddle_ai.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
         paddle_ai.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
+    elseif paddle_ai.y < wallHeight then
+        paddle_ai.y = wallHeight
     end
 
     -- ai paddle hits
@@ -106,6 +109,10 @@ function Tennis_1P.tennis(dt)
             ball.x = paddle_ai.x
 
             TEsound.play(paddleAIHit, "static")
+        else
+            score = score + 1
+
+            Tennis_1P.randomize_ball()
         end
     end
 
@@ -119,13 +126,12 @@ function Tennis_1P.tennis(dt)
             else
                 AI_score = AI_score + 1
 
-                ball.x = 400
-                ball.y = 300
+                Tennis_1P.randomize_ball()
             end
         end
     end
 
-    if AI_score == 10 then
+    if AI_score == 20 then
         lose = true
     end
 end
@@ -158,4 +164,12 @@ function Tennis_1P.drawGame()
     -- enemy score
     love.graphics.printf(AI_score, (WINDOWWIDTH / 2) + 60, 20, 100, "left")
 
+end
+
+function Tennis_1P.randomize_ball()
+    ball.x = WINDOWWIDTH / 2
+    ball.y = math.random(10, WINDOWHEIGHT - wallHeight)
+end
+
+function Tennis_1P.increase_ballSpeed()
 end
