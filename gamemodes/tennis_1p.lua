@@ -93,7 +93,28 @@ function Tennis_1P.tennis(dt)
     end
 
     -- AI movements
-    paddle_ai.y = ball.y
+    paddleCount = paddleCount + dt
+    if paddleCount >= 0.05 then
+        target = ball.y
+
+        paddleCount = 0
+    end
+
+    local dist = paddle_ai.y - target
+    local maxSpeed = paddle_ai.speed
+
+    -- speed gets smaller as distance gets smaller
+    local speed = math.min(maxSpeed, math.abs(dist) * 20)
+
+    if math.abs(dist) <= 3 then
+        paddle_ai.y = target
+    else
+        if target > paddle_ai.y then
+        paddle_ai.y = paddle_ai.y + dt * speed
+        elseif target < paddle_ai.y then
+            paddle_ai.y = paddle_ai.y - dt * speed
+        end
+    end
 
     if paddle_ai.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
         paddle_ai.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
@@ -163,7 +184,6 @@ function Tennis_1P.drawGame()
 
     -- enemy score
     love.graphics.printf(AI_score, (WINDOWWIDTH / 2) + 60, 20, 100, "left")
-
 end
 
 function Tennis_1P.randomize_ball()
