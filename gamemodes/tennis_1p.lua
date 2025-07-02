@@ -31,7 +31,7 @@ function Tennis_1P.init()
         y = WINDOWHEIGHT / 2,
         width = 10,
         height = 70,
-        speed = 450
+        speed = 500
     }
 
     -- ball stuff
@@ -127,31 +127,35 @@ function Tennis_1P.tennis(dt)
     end
 
     -- ai paddle hits
-    if ball.x > paddle_ai.x + paddle_ai.width then
+    if ball.x > paddle_ai.x then
         -- y collision
         if(ball.y + ball.height > paddle_ai.y) and (ball.y < paddle_ai.y + paddle_ai.height) then
             ball_velocity.x = ball_velocity.x * (-1)
             ball.x = paddle_ai.x
 
+            Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+
             TEsound.play(paddleAIHit, "static")
         else
             score = score + 1
 
-            Tennis_1P.randomize_ball()
+            Tennis_1P.randomize_ball(true)
         end
     end
 
     if lose == false then
-        if ball.x < paddle.x then
+        if ball.x < paddle.x + paddle.width then
             if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
                 ball_velocity.x = ball_velocity.x * (-1)
                 ball.x = paddle.x + paddle.width
+
+                Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
 
                 TEsound.play(paddleHit, "static")
             else
                 AI_score = AI_score + 1
 
-                Tennis_1P.randomize_ball()
+                Tennis_1P.randomize_ball(false)
             end
         end
     end
@@ -190,10 +194,28 @@ function Tennis_1P.drawGame()
     love.graphics.printf(AI_score, (WINDOWWIDTH / 2) + 60, 20, 100, "left")
 end
 
-function Tennis_1P.randomize_ball()
+function Tennis_1P.randomize_ball(playerScored)
     ball.x = WINDOWWIDTH / 2
     ball.y = math.random(10, WINDOWHEIGHT - wallHeight)
+
+    if playerScored then
+        ball_velocity.x = 300
+        ball_velocity.y = 300
+    else
+        ball_velocity.x = -300
+        ball_velocity.y = -300
+    end
 end
 
-function Tennis_1P.increase_ballSpeed()
+function Tennis_1P.increase_ballSpeed(ballSpeedX, ballSpeedY)
+    local current_speed = math.sqrt(ballSpeedX^2 + ballSpeedY^2)
+
+    local speed_increase = 35
+    local newSpeed = math.max(speed_increase + current_speed, 700)
+
+
+    local speed_factor = newSpeed / current_speed
+
+    ball_velocity.x = ballSpeedX * speed_factor
+    ball_velocity.y = ballSpeedY * speed_factor
 end
