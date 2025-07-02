@@ -94,8 +94,16 @@ function Tennis_1P.tennis(dt)
 
     -- AI movements
     paddleCount = paddleCount + dt
-    if paddleCount >= 0.05 then
-        target = ball.y
+    local random_check = math.random(0.3, 0.7)
+    
+    if paddleCount >= random_check then
+        if ball_velocity.x > 0 then 
+            local time_to_reach = (paddle_ai.x - ball.x) / ball_velocity.x
+
+            target = ball.y + (ball_velocity.y * time_to_reach)  + math.random(-30, 30)
+        else
+            target = ball.y
+        end
 
         paddleCount = 0
     end
@@ -106,14 +114,10 @@ function Tennis_1P.tennis(dt)
     -- speed gets smaller as distance gets smaller
     local speed = math.min(maxSpeed, math.abs(dist) * 20)
 
-    if math.abs(dist) <= 3 then
-        paddle_ai.y = target
-    else
-        if target > paddle_ai.y then
+    if target > paddle_ai.y then
         paddle_ai.y = paddle_ai.y + dt * speed
-        elseif target < paddle_ai.y then
-            paddle_ai.y = paddle_ai.y - dt * speed
-        end
+    elseif target < paddle_ai.y then
+        paddle_ai.y = paddle_ai.y - dt * speed
     end
 
     if paddle_ai.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
@@ -123,7 +127,7 @@ function Tennis_1P.tennis(dt)
     end
 
     -- ai paddle hits
-    if ball.x > paddle_ai.x then
+    if ball.x > paddle_ai.x + paddle_ai.width then
         -- y collision
         if(ball.y + ball.height > paddle_ai.y) and (ball.y < paddle_ai.y + paddle_ai.height) then
             ball_velocity.x = ball_velocity.x * (-1)
@@ -138,7 +142,7 @@ function Tennis_1P.tennis(dt)
     end
 
     if lose == false then
-        if ball.x < paddle.x + paddle.width then
+        if ball.x < paddle.x then
             if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
                 ball_velocity.x = ball_velocity.x * (-1)
                 ball.x = paddle.x + paddle.width
