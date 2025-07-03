@@ -94,15 +94,15 @@ function Tennis_1P.tennis(dt)
 
     -- AI movements
     paddleCount = paddleCount + dt
-    local random_check = math.random(0.3, 0.7)
-    
+    local random_check = math.random(0.3, 0.6)
+
     if paddleCount >= random_check then
-        if ball_velocity.x > 0 then 
+        if ball_velocity.x > 0 then
             local time_to_reach = (paddle_ai.x - ball.x) / ball_velocity.x
 
-            target = ball.y + (ball_velocity.y * time_to_reach)  + math.random(-30, 30)
+            target = ball.y + ball.height / 2 + (ball_velocity.y * time_to_reach) - paddle_ai.height / 2 --math.random(-10, 10)
         else
-            target = ball.y
+            target = ball.y + ball.height / 2 - paddle_ai.height / 2
         end
 
         paddleCount = 0
@@ -112,7 +112,7 @@ function Tennis_1P.tennis(dt)
     local maxSpeed = paddle_ai.speed
 
     -- speed gets smaller as distance gets smaller
-    local speed = math.min(maxSpeed, math.abs(dist) * 20)
+    local speed = math.min(maxSpeed, math.abs(dist) * 100)
 
     if target > paddle_ai.y then
         paddle_ai.y = paddle_ai.y + dt * speed
@@ -210,7 +210,7 @@ end
 function Tennis_1P.increase_ballSpeed(ballSpeedX, ballSpeedY)
     local current_speed = math.sqrt(ballSpeedX^2 + ballSpeedY^2)
 
-    local speed_increase = 35
+    local speed_increase = 20
     local newSpeed = math.max(speed_increase + current_speed, 700)
 
 
