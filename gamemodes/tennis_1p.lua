@@ -9,9 +9,12 @@ local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30)
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 -- local vars
-local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose, paddleCount, target
+local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose, loseScreen, paddleCount, target, win, winScreen
 
+local titleY = 0
+local time = 0
 -- audio
+local setEndMusic = false
 
 function Tennis_1P.init()
     -- wall stuff
@@ -57,7 +60,55 @@ function Tennis_1P.init()
 
     -- flag for loss
     lose = false
+    loseScreen = false
 
+    -- flag for win
+    win = false
+    winScreen = false
+
+end
+
+function Tennis_1P.reset()
+    -- paddles
+    paddle.x = 20
+    paddle.y = WINDOWHEIGHT / 2
+    paddle.speed = 500
+
+    paddle_ai.x = WINDOWWIDTH - 20
+    paddle_ai.y = WINDOWHEIGHT / 2
+    paddle_ai.speed = 500
+
+    -- ball stuff
+    ball = {
+        x = WINDOWWIDTH / 2,
+        y = math.random(10, WINDOWHEIGHT - wallHeight), 
+        width = 10,
+        height = 10
+    }
+
+    ball_velocity = {
+        x = -300,
+        y = -300
+    }
+
+    -- scores
+    score = 0
+    AI_score = 0
+
+    -- ai stuff
+    paddleCount = 0
+    target = ball.y
+
+    -- reset flags
+    lose = false
+    loseScreen = false
+
+    win = false
+    winScreen = false
+
+    -- reset music
+    setEndMusic = false
+    TEsound.stop("endMenu")
 end
 
 function Tennis_1P.tennis(dt)
@@ -126,24 +177,8 @@ function Tennis_1P.tennis(dt)
         paddle_ai.y = wallHeight
     end
 
-    -- ai paddle hits
-    if ball.x > paddle_ai.x then
-        -- y collision
-        if(ball.y + ball.height > paddle_ai.y) and (ball.y < paddle_ai.y + paddle_ai.height) then
-            ball_velocity.x = ball_velocity.x * (-1)
-            ball.x = paddle_ai.x
-
-            Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
-
-            TEsound.play(paddleAIHit, "static")
-        else
-            score = score + 1
-
-            Tennis_1P.randomize_ball(true)
-        end
-    end
-
-    if lose == false then
+    -- check paddle collisions
+    if loseScreen == false and winScreen == false then
         if ball.x < paddle.x + paddle.width then
             if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
                 ball_velocity.x = ball_velocity.x * (-1)
@@ -158,13 +193,83 @@ function Tennis_1P.tennis(dt)
                 Tennis_1P.randomize_ball(false)
             end
         end
+
+
+        -- ai paddle hits
+        if ball.x > paddle_ai.x then
+            -- y collision
+            if(ball.y + ball.height > paddle_ai.y) and (ball.y < paddle_ai.y + paddle_ai.height) then
+                ball_velocity.x = ball_velocity.x * (-1)
+                ball.x = paddle_ai.x
+
+                Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+
+                TEsound.play(paddleAIHit, "static")
+            else
+                score = score + 1
+
+                Tennis_1P.randomize_ball(true)
+            end
+        end
     end
 
-    if AI_score == 20 then
-        lose = true
+    if AI_score == 10 then
+        loseScreen = true
+    end
+
+    if score == 10 then
+        winScreen = true
+    end
+
+    -- play end music
+    if (loseScreen == true or winScreen == true) and setEndMusic == false then
+        TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.5)
+
+        setEndMusic = true
+    end
+
+    -- floating UI
+    if winScreen == true or loseScreen == true then
+        -- update title
+        time = time + dt
+        titleY = 10 * math.sin(time)
+    end
+
+end
+
+
+function Tennis_1P.keypressed(key)
+    if key == '1' then
+        TEsound.play(selectDing, "static")
+        Tennis_1P.reset()
+        
+        if loseScreen == true then
+            loseScreen = false
+        end
+
+        if winScreen == true then
+            winScreen = false
+        end
+    elseif key == '2' then
+        TEsound.play(selectDing, "static")
+        
+        if lose == false then
+            lose = true
+        elseif win == false then
+            win = true
+        end
     end
 end
 
+function Tennis_1P.isGameOver()
+    if lose == true or win == true then
+        TEsound.stop("endMenu")
+
+        return true
+    end
+
+    return false
+end
 
 function Tennis_1P.drawGame()
     love.graphics.setFont(font)
@@ -192,6 +297,46 @@ function Tennis_1P.drawGame()
 
     -- enemy score
     love.graphics.printf(AI_score, (WINDOWWIDTH / 2) + 60, 20, 100, "left")
+
+    if loseScreen == true then
+        -- fill up the background to be black! with some opacity
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+        -- then we will add text
+        love.graphics.setColor(1, 1, 1, 1) -- make text white
+
+        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 150 + titleY, 200, "left")
+
+        -- set smaller font
+        love.graphics.setFont(smallFont)
+        love.graphics.printf("You lost :(", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2, 400, "left")
+
+        -- go back to menu or restart
+        love.graphics.setFont(smallerFont)
+        love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 250, WINDOWHEIGHT / 2 + 120, 400, "left")
+        love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 120, 400, "left")
+    end
+
+    if winScreen == true then
+        -- fill up the background to be black! with some opacity
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+        -- then we will add text
+        love.graphics.setColor(1, 1, 1, 1) -- make text white
+
+        love.graphics.printf("GAME OVER", WINDOWWIDTH / 2 - 99, WINDOWHEIGHT / 2 - 150 + titleY, 200, "left")
+
+        -- set smaller font
+        love.graphics.setFont(smallFont)
+        love.graphics.printf("You won :)", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2, 400, "left")
+
+        -- go back to menu or restart
+        love.graphics.setFont(smallerFont)
+        love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 250, WINDOWHEIGHT / 2 + 120, 400, "left")
+        love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 120, 400, "left")
+    end
 end
 
 function Tennis_1P.randomize_ball(playerScored)

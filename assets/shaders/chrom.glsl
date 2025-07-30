@@ -1,6 +1,6 @@
 // my source to learn from: https://love2d.org/forums/viewtopic.php?t=85736
 
-extern float elapsed = 10;
+extern float elapsed = 10.0;
 
 vec2 radialDistortion(vec2 coord, float dist)
 {
@@ -11,11 +11,11 @@ vec2 radialDistortion(vec2 coord, float dist)
 
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
 {
-    vec2 tcr = radialDistortion(texture_coords, 0.22) + vec2(0.001, 0);
+    vec2 tcr = radialDistortion(texture_coords, 0.22) + vec2(0.001, 0.0);
     vec2 tcg  = radialDistortion(texture_coords, 0.21);
-    vec2 tcb = radialDistortion(texture_coords, 0.20) - vec2(0.001, 0);
-    vec4 res = vec4(Texel(texture, tcr).r, Texel(texture, tcg).g, Texel(texture, tcb).b, 1)
-        - cos(tcg.y * 128. * 3.142 * 2) * 0.001
-        - sin(tcg.x * 128. * 3.142 * 2) * 0.001;
+    vec2 tcb = radialDistortion(texture_coords, 0.20) - vec2(0.001, 0.0);
+    vec4 res = vec4(Texel(texture, tcr).r, Texel(texture, tcg).g, Texel(texture, tcb).b, 1.0)
+        - cos(tcg.y * 128.0 * 3.142 * 2) * 0.001
+        - sin(tcg.x * 128.0 * 3.142 * 2) * 0.001;
     return res * Texel(texture, tcg).a;
 }

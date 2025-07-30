@@ -51,27 +51,27 @@ function love.load()
 
     -- sound effects!
     wallHits = {
-        "assets/audio/sound_effects/wallHit1.wav",
-        "assets/audio/sound_effects/wallHit2.wav",
-        "assets/audio/sound_effects/wallHit3.wav"
+        "assets/audio/sound_effects/wallHit1.ogg",
+        "assets/audio/sound_effects/wallHit2.ogg",
+        "assets/audio/sound_effects/wallHit3.ogg"
     }
 
-    paddleHit = "assets/audio/sound_effects/paddleHit.wav"
+    paddleHit = "assets/audio/sound_effects/paddleHit.ogg"
 
-    paddleAIHit = "assets/audio/sound_effects/paddleAIHit.wav"
+    paddleAIHit = "assets/audio/sound_effects/paddleAIHit.ogg"
 
-    scoreDing = "assets/audio/sound_effects/score.wav"
+    scoreDing = "assets/audio/sound_effects/score.ogg"
 
-    speedIncrease = "assets/audio/sound_effects/speedIncrease.wav"
+    speedIncrease = "assets/audio/sound_effects/speedIncrease.ogg"
 
-    selectDing = "assets/audio/sound_effects/select.wav"
+    selectDing = "assets/audio/sound_effects/select.ogg"
 
-    lilGuyHit = "assets/audio/sound_effects/lilGuyHit.wav"
-    paddleGuyHit = "assets/audio/sound_effects/paddleLilGuyHit.wav"
-    lilGuyStep = "assets/audio/sound_effects/lilGuyStep.wav"
+    lilGuyHit = "assets/audio/sound_effects/lilGuyHit.ogg"
+    paddleGuyHit = "assets/audio/sound_effects/paddleLilGuyHit.ogg"
+    lilGuyStep = "assets/audio/sound_effects/lilGuyStep.ogg"
 
-    menuMusic = "assets/audio/music/main_menu.wav"
-    gameOverMusic = "assets/audio/music/game_over.wav"
+    menuMusic = "assets/audio/music/main_menu.ogg"
+    gameOverMusic = "assets/audio/music/game_over.ogg"
 
     TEsound.volume("all", .2)
 
@@ -106,7 +106,14 @@ function love.update(dt)
         Handball.reset()
     end
 
-    if game_state == "menu" and prev_state == "handball" then
+    -- check if tennis is lost
+    if Tennis_1P.isGameOver() then
+        game_state = "menu"
+
+        Tennis_1P.reset()
+    end
+
+    if game_state == "menu" and (prev_state == "handball" or prev_state == "tennis_1p") then
         TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.3)
     end
 
@@ -227,6 +234,8 @@ function love.keypressed(key, scan_code, is_repeat)
         menu_keypressed(key)
     elseif game_state == "handball" then
         Handball.keypressed(key)
+    elseif game_state == "tennis_1p" then
+        Tennis_1P.keypressed(key)
     end
 end
 
