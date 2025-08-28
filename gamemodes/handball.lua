@@ -12,10 +12,11 @@ local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30)
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 -- local variables
-local wallHeight, paddle, balls, ball_velocities, score, lose, max_speed, endScreen, eventTimer, curr_time
+local wallHeight, paddle, balls, ball_velocities, score, lose, max_speed, endScreen, eventTimer, curr_time, pauseScreen
 
 local time = 0
 -- random events
+local titleY = 0
 local events
 local ogPaddleHeight = 70
 local ogPaddleSpeed = 500
@@ -86,6 +87,8 @@ function Handball.init()
 
     -- endScreen
     endScreen = false
+
+    pauseScreen = false
 
     Handball.spawn_obstacle()
 end
@@ -165,12 +168,15 @@ function Handball.reset()
     -- endScreen
     endScreen = false
 
+    pauseScreen = false
+
     -- end music
     setEndMusic = false
     TEsound.stop("endMenu")
 end
 
 function Handball.handball(dt)
+    if pauseScreen ~= true then
         -- paddle movements
         if love.keyboard.isDown("down") then
             paddle.y  = paddle.y  + paddle.speed * dt
@@ -372,10 +378,11 @@ function Handball.handball(dt)
             time = time + dt
             titleY = 10 * math.sin(time)
         end
+    end
 end
 
 function Handball.keypressed(key)
-    if endScreen then
+    if endScreen or pauseScreen then
         if key == '1' then
             TEsound.play(selectDing, "static")
             Handball.reset()
@@ -387,6 +394,13 @@ function Handball.keypressed(key)
         end
     end
 
+    if key == 'escape' then
+        if pauseScreen then
+            pauseScreen = false
+        else
+            pauseScreen = true
+        end
+    end
 end
 
 function Handball.isGameOver()
@@ -485,6 +499,23 @@ function Handball.drawGame()
         love.graphics.setFont(smallerFont)
         love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 300, WINDOWHEIGHT / 2 + 150, 400, "left")
         love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 150, 400, "left")
+    end
+
+    if pauseScreen == true then
+        -- fill up the background to be black! with some opacity
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+        -- then we will add text
+        love.graphics.setColor(1, 1, 1, 1) -- make text white
+
+        love.graphics.printf("PAUSED", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2 - 150 + titleY, 300, "left")
+
+
+        -- go back to menu or restart
+        love.graphics.setFont(smallerFont)
+        love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 250, WINDOWHEIGHT / 2 + 120, 400, "left")
+        love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 120, 400, "left")
     end
 end
 

@@ -9,7 +9,7 @@ local smallFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 30)
 local smallerFont = love.graphics.newFont("assets/fonts/PublicPixel.ttf", 20) 
 
 -- local vars
-local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose, loseScreen, paddleCount, target, win, winScreen
+local wallHeight, paddle, paddle_ai, ball, ball_velocity, score, AI_score, lose, loseScreen, paddleCount, target, win, winScreen, pauseScreen
 
 local titleY = 0
 local time = 0
@@ -66,6 +66,8 @@ function Tennis_1P.init()
     win = false
     winScreen = false
 
+    pauseScreen = false
+
 end
 
 function Tennis_1P.reset()
@@ -106,6 +108,8 @@ function Tennis_1P.reset()
     win = false
     winScreen = false
 
+    pauseScreen = false
+
     -- reset music
     setEndMusic = false
     TEsound.stop("endMenu")
@@ -113,154 +117,155 @@ function Tennis_1P.reset()
 end
 
 function Tennis_1P.tennis(dt)
-    -- human paddle movements
-    if love.keyboard.isDown("down") then
-        paddle.y = paddle.y + paddle.speed * dt
-    elseif love.keyboard.isDown("up") then
-        paddle.y = paddle.y - paddle.speed * dt
-    end
-
-    -- human paddle constraints/limits
-    if paddle.y  < wallHeight then
-        paddle.y = wallHeight
-    elseif paddle.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
-        paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
-    end
-
-    -- ball movements
-    ball.x = ball.x + ball_velocity.x * dt
-    ball.y = ball.y + ball_velocity.y * dt
-
-    -- y pos ball wall constraints
-    if ball.y > (WINDOWHEIGHT - wallHeight) - ball.height then
-        ball_velocity.y = ball_velocity.y * (-1)
-        ball.y = (WINDOWHEIGHT - wallHeight) - ball.height
-
-        TEsound.play(wallHits, "static")
-    elseif ball.y < wallHeight then
-        ball_velocity.y = ball_velocity.y * (-1)
-        ball.y = wallHeight
-
-        TEsound.play(wallHits, "static")
-    end
-
-    -- AI movements
-    paddleCount = paddleCount + dt
-    local random_check = math.random(0.3, 0.6)
-
-    if paddleCount >= random_check then
-        if ball_velocity.x > 0 then
-            local time_to_reach = (paddle_ai.x - ball.x) / ball_velocity.x
-
-            target = ball.y + ball.height / 2 + (ball_velocity.y * time_to_reach) - paddle_ai.height / 2 --math.random(-10, 10)
-        else
-            target = ball.y + ball.height / 2 - paddle_ai.height / 2
+    if pauseScreen ~= true then
+        -- human paddle movements
+        if love.keyboard.isDown("down") then
+            paddle.y = paddle.y + paddle.speed * dt
+        elseif love.keyboard.isDown("up") then
+            paddle.y = paddle.y - paddle.speed * dt
         end
 
-        paddleCount = 0
-    end
+        -- human paddle constraints/limits
+        if paddle.y  < wallHeight then
+            paddle.y = wallHeight
+        elseif paddle.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
+            paddle.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
+        end
 
-    local dist = paddle_ai.y - target
-    local maxSpeed = paddle_ai.speed
+        -- ball movements
+        ball.x = ball.x + ball_velocity.x * dt
+        ball.y = ball.y + ball_velocity.y * dt
 
-    -- speed gets smaller as distance gets smaller
-    local speed = math.min(maxSpeed, math.abs(dist) * 100)
+        -- y pos ball wall constraints
+        if ball.y > (WINDOWHEIGHT - wallHeight) - ball.height then
+            ball_velocity.y = ball_velocity.y * (-1)
+            ball.y = (WINDOWHEIGHT - wallHeight) - ball.height
 
-    if target > paddle_ai.y then
-        paddle_ai.y = paddle_ai.y + dt * speed
-    elseif target < paddle_ai.y then
-        paddle_ai.y = paddle_ai.y - dt * speed
-    end
+            TEsound.play(wallHits, "static")
+        elseif ball.y < wallHeight then
+            ball_velocity.y = ball_velocity.y * (-1)
+            ball.y = wallHeight
 
-    if paddle_ai.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
-        paddle_ai.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
-    elseif paddle_ai.y < wallHeight then
-        paddle_ai.y = wallHeight
-    end
+            TEsound.play(wallHits, "static")
+        end
 
-    -- check paddle collisions
-    if loseScreen == false and winScreen == false then
-        if ball.x < paddle.x + paddle.width then
-            if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
-                ball_velocity.x = ball_velocity.x * (-1)
-                ball.x = paddle.x + paddle.width
+        -- AI movements
+        paddleCount = paddleCount + dt
+        local random_check = math.random(0.3, 0.6)
 
-                Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+        if paddleCount >= random_check then
+            if ball_velocity.x > 0 then
+                local time_to_reach = (paddle_ai.x - ball.x) / ball_velocity.x
 
-                TEsound.play(paddleHit, "static")
+                target = ball.y + ball.height / 2 + (ball_velocity.y * time_to_reach) - paddle_ai.height / 2 --math.random(-10, 10)
             else
-                AI_score = AI_score + 1
+                target = ball.y + ball.height / 2 - paddle_ai.height / 2
+            end
 
-                Tennis_1P.randomize_ball(false)
+            paddleCount = 0
+        end
+
+        local dist = paddle_ai.y - target
+        local maxSpeed = paddle_ai.speed
+
+        -- speed gets smaller as distance gets smaller
+        local speed = math.min(maxSpeed, math.abs(dist) * 100)
+
+        if target > paddle_ai.y then
+            paddle_ai.y = paddle_ai.y + dt * speed
+        elseif target < paddle_ai.y then
+            paddle_ai.y = paddle_ai.y - dt * speed
+        end
+
+        if paddle_ai.y  > (WINDOWHEIGHT - wallHeight) - paddle.height then
+            paddle_ai.y  = (WINDOWHEIGHT - wallHeight) - paddle.height
+        elseif paddle_ai.y < wallHeight then
+            paddle_ai.y = wallHeight
+        end
+
+        -- check paddle collisions
+        if loseScreen == false and winScreen == false then
+            if ball.x < paddle.x + paddle.width then
+                if(ball.y + ball.height > paddle.y ) and (ball.y < paddle.y + paddle.height) then
+                    ball_velocity.x = ball_velocity.x * (-1)
+                    ball.x = paddle.x + paddle.width
+
+                    Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+
+                    TEsound.play(paddleHit, "static")
+                else
+                    AI_score = AI_score + 1
+
+                    Tennis_1P.randomize_ball(false)
+                end
+            end
+
+
+            -- ai paddle hits
+            if ball.x > paddle_ai.x then
+                -- y collision
+                if(ball.y + ball.height > paddle_ai.y) and (ball.y < paddle_ai.y + paddle_ai.height) then
+                    ball_velocity.x = ball_velocity.x * (-1)
+                    ball.x = paddle_ai.x
+
+                    Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+
+                    TEsound.play(paddleAIHit, "static")
+                else
+                    score = score + 1
+
+                    Tennis_1P.randomize_ball(true)
+                end
             end
         end
 
-
-        -- ai paddle hits
-        if ball.x > paddle_ai.x then
-            -- y collision
-            if(ball.y + ball.height > paddle_ai.y) and (ball.y < paddle_ai.y + paddle_ai.height) then
-                ball_velocity.x = ball_velocity.x * (-1)
-                ball.x = paddle_ai.x
-
-                Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
-
-                TEsound.play(paddleAIHit, "static")
-            else
-                score = score + 1
-
-                Tennis_1P.randomize_ball(true)
+        -- check if ball is off screen and game is over
+        if winScreen == true then
+            if ball.x > WINDOWWIDTH then
+                ball_velocity.x = 0
+                ball_velocity.y = 0
             end
         end
-    end
 
-    -- check if ball is off screen and game is over
-    if winScreen == true then
-        if ball.x > WINDOWWIDTH then
-            ball_velocity.x = 0
-            ball_velocity.y = 0
+        if loseScreen == true then 
+            if ball.x < -ball.width then
+                ball_velocity.x = 0
+                ball_velocity.y = 0
+            end
+        end
+
+        if AI_score == 10 then
+            loseScreen = true
+        end
+
+        if score == 10 then
+            winScreen = true
+        end
+
+        -- play end music
+        if loseScreen == true and setEndMusic == false then
+            TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.5)
+
+            setEndMusic = true
+        end
+        if winScreen == true and setEndMusic == false then
+            TEsound.playLooping(winMusic, "stream", "winMenu", nil, 0.5)
+
+            setEndMusic = true
+        end
+
+        -- floating UI
+        if winScreen == true or loseScreen == true then
+            -- update title
+            time = time + dt
+            titleY = 10 * math.sin(time)
         end
     end
-
-    if loseScreen == true then 
-        if ball.x < -ball.width then
-            ball_velocity.x = 0
-            ball_velocity.y = 0
-        end
-    end
-
-    if AI_score == 10 then
-        loseScreen = true
-    end
-
-    if score == 10 then
-        winScreen = true
-    end
-
-    -- play end music
-    if loseScreen == true and setEndMusic == false then
-        TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.5)
-
-        setEndMusic = true
-    end
-    if winScreen == true and setEndMusic == false then
-        TEsound.playLooping(winMusic, "stream", "winMenu", nil, 0.5)
-
-        setEndMusic = true
-    end
-
-    -- floating UI
-    if winScreen == true or loseScreen == true then
-        -- update title
-        time = time + dt
-        titleY = 10 * math.sin(time)
-    end
-
 end
 
 
 function Tennis_1P.keypressed(key)
-    if loseScreen or winScreen then
+    if loseScreen or winScreen or pauseScreen then
         if key == '1' then
             TEsound.play(selectDing, "static")
             Tennis_1P.reset()
@@ -280,6 +285,14 @@ function Tennis_1P.keypressed(key)
             elseif win == false then
                 win = true
             end
+        end
+    end
+
+    if key == 'escape' then
+        if pauseScreen then
+            pauseScreen = false
+        else
+            pauseScreen = true
         end
     end
 end
@@ -360,6 +373,23 @@ function Tennis_1P.drawGame()
         -- set smaller font
         love.graphics.setFont(smallFont)
         love.graphics.printf("You won :)", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2, 400, "left")
+
+        -- go back to menu or restart
+        love.graphics.setFont(smallerFont)
+        love.graphics.printf("[1] Restart", WINDOWWIDTH / 2 - 250, WINDOWHEIGHT / 2 + 120, 400, "left")
+        love.graphics.printf("[2] Menu", WINDOWWIDTH / 2 + 50, WINDOWHEIGHT / 2 + 120, 400, "left")
+    end
+
+    if pauseScreen == true then
+        -- fill up the background to be black! with some opacity
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("fill", 0, 0, WINDOWWIDTH, WINDOWHEIGHT)
+
+        -- then we will add text
+        love.graphics.setColor(1, 1, 1, 1) -- make text white
+
+        love.graphics.printf("PAUSED", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2 - 150 + titleY, 300, "left")
+
 
         -- go back to menu or restart
         love.graphics.setFont(smallerFont)
