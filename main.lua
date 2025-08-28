@@ -16,8 +16,7 @@ local game_state = 'menu'
 local prev_state = game_state
 local menus = {
     'Handball',
-   'Tennis (1P)',
-    'Quit'
+   'Tennis (1P)'
 }
 local selected_menu_item = 1
 
@@ -275,8 +274,6 @@ function menu_keypressed(key)
             Tennis_1P.init()
 
             game_state = 'tennis_1p'
-        elseif menus[selected_menu_item] == 'Quit' then
-            love.event.quit()
         end
     end
 end
