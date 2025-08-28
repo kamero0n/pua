@@ -260,24 +260,26 @@ end
 
 
 function Tennis_1P.keypressed(key)
-    if key == '1' then
-        TEsound.play(selectDing, "static")
-        Tennis_1P.reset()
-        
-        if loseScreen == true then
-            loseScreen = false
-        end
+    if loseScreen or winScreen then
+        if key == '1' then
+            TEsound.play(selectDing, "static")
+            Tennis_1P.reset()
+            
+            if loseScreen == true then
+                loseScreen = false
+            end
 
-        if winScreen == true then
-            winScreen = false
-        end
-    elseif key == '2' then
-        TEsound.play(selectDing, "static")
-        
-        if lose == false then
-            lose = true
-        elseif win == false then
-            win = true
+            if winScreen == true then
+                winScreen = false
+            end
+        elseif key == '2' then
+            TEsound.play(selectDing, "static")
+            
+            if lose == false then
+                lose = true
+            elseif win == false then
+                win = true
+            end
         end
     end
 end

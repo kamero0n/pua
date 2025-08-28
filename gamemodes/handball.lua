@@ -375,14 +375,16 @@ function Handball.handball(dt)
 end
 
 function Handball.keypressed(key)
-    if key == '1' then
-        TEsound.play(selectDing, "static")
-        Handball.reset()
+    if endScreen then
+        if key == '1' then
+            TEsound.play(selectDing, "static")
+            Handball.reset()
 
-        endScreen = false
-    elseif key == '2' then
-        TEsound.play(selectDing, "static")
-        lose = true
+            endScreen = false
+        elseif key == '2' then
+            TEsound.play(selectDing, "static")
+            lose = true
+        end
     end
 
 end
