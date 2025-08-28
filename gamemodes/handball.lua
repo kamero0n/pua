@@ -243,102 +243,101 @@ function Handball.handball(dt)
                 if #balls == 0 then
                     endScreen = true
                 end
+            else
+                -- check for collisions w/ other paddles
+                if obstaclesActive then
+                    if #obstacles > 0 then 
+                        for j = #obstacles, 1, -1 do
+                            local collided = Handball.check_collision(ball, obstacles[j])
 
-                goto continue
-            end
+                            if collided == true then
+                                Handball.handle_obstacle_collision(ball, ball_velocity, obstacles[j])
+                                TEsound.play(wallHits, "static")
 
-            -- check for collisions w/ other paddles
-            if obstaclesActive then
-                if #obstacles > 0 then 
-                    for j = #obstacles, 1, -1 do
-                        local collided = Handball.check_collision(ball, obstacles[j])
+                                break
+                            end
+                        end
+                    end
+                end
 
-                        if collided == true then
-                            Handball.handle_obstacle_collision(ball, ball_velocity, obstacles[j])
-                            TEsound.play(wallHits, "static")
+                -- check for collisions w/ lil guy
+                if lilGuysActive then
+                    for i = #LilDudes.get_lilGuys(), 1, -1 do
+                        local hitlilGuy = Handball.check_collision(ball, LilDudes.get_lilGuys()[i])
+
+                        if hitlilGuy and LilDudes.get_lilGuys()[i].state ~= "collapsed" then
+                            Handball.handle_obstacle_collision(ball, ball_velocity, LilDudes.get_lilGuys()[i])
+
+                            TEsound.play(lilGuyHit, "static")
+                            LilDudes.get_lilGuys()[i].state = "collapsed"
+                            score = score - 1
 
                             break
                         end
                     end
                 end
-            end
 
-            -- check for collisions w/ lil guy
-            if lilGuysActive then
-                for i = #LilDudes.get_lilGuys(), 1, -1 do
-                    local hitlilGuy = Handball.check_collision(ball, LilDudes.get_lilGuys()[i])
+                -- check for collisions w/ paddle
+                if lose == false and endScreen ~= true then
+                    if ball.x < paddle.x + ball.width then
+                        -- y collision check
+                        if(ball.y + ball.height >= paddle.y ) and (ball.y <= paddle.y + paddle.height) then
+                            ball_velocity.x = ball_velocity.x * (-1)
+                            ball.x = paddle.x + paddle.width
 
-                    if hitlilGuy and LilDudes.get_lilGuys()[i].state ~= "collapsed" then
-                        Handball.handle_obstacle_collision(ball, ball_velocity, LilDudes.get_lilGuys()[i])
+                            score = score + 1
+                            TEsound.play(scoreDing, "static", 0.5)
+                            TEsound.play(paddleHit, "static")
 
-                        TEsound.play(lilGuyHit, "static")
-                        LilDudes.get_lilGuys()[i].state = "collapsed"
-                        score = score - 1
+                            -- every five hits increase the speed of the ball ... max speed at 800 AND have a special event start
+                            if score % 3
+                            == 0 and score ~= 0 then
+                                if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
+                                    if ball_velocity.x < 0 then
+                                        ball_velocity.x = ball_velocity.x - 50.0
+                                    else
+                                        ball_velocity.x = ball_velocity.x + 50.0
+                                    end
 
-                        break
-                    end
-                end
-            end
-
-            -- check for collisions w/ paddle
-            if lose == false and endScreen ~= true then
-                if ball.x < paddle.x + ball.width then
-                    -- y collision check
-                    if(ball.y + ball.height >= paddle.y ) and (ball.y <= paddle.y + paddle.height) then
-                        ball_velocity.x = ball_velocity.x * (-1)
-                        ball.x = paddle.x + paddle.width
-
-                        score = score + 1
-                        TEsound.play(scoreDing, "static", 0.5)
-                        TEsound.play(paddleHit, "static")
-
-                        -- every five hits increase the speed of the ball ... max speed at 800 AND have a special event start
-                        if score % 3
-                         == 0 and score ~= 0 then
-                            if ball_velocity.x <= max_speed and ball_velocity.x >= -max_speed then
-                                if ball_velocity.x < 0 then
-                                    ball_velocity.x = ball_velocity.x - 50.0
-                                else
-                                    ball_velocity.x = ball_velocity.x + 50.0
+                                    TEsound.play(speedIncrease, "static")
                                 end
 
-                                TEsound.play(speedIncrease, "static")
-                            end
+                                if ball_velocity.y <= max_speed and ball_velocity.y >= -max_speed then
+                                    if ball_velocity.y < 0 then
+                                        ball_velocity.y = ball_velocity.y - 50.0
+                                    else
+                                        ball_velocity.y = ball_velocity.y + 50.0
+                                    end
 
-                            if ball_velocity.y <= max_speed and ball_velocity.y >= -max_speed then
-                                if ball_velocity.y < 0 then
-                                    ball_velocity.y = ball_velocity.y - 50.0
-                                else
-                                    ball_velocity.y = ball_velocity.y + 50.0
+                                    TEsound.play(speedIncrease, "static")
                                 end
 
-                                TEsound.play(speedIncrease, "static")
-                            end
+                                local randomChoice = math.random(1, #events)
+                                
+                                -- only have an event play if it's non timed or no timer is currently active
+                                if events[randomChoice][2] == 0 or eventTimer == 0 then
+                                    events[randomChoice][1]()
 
-                            local randomChoice = math.random(1, #events)
-                            
-                            -- only have an event play if it's non timed or no timer is currently active
-                            if events[randomChoice][2] == 0 or eventTimer == 0 then
-                                events[randomChoice][1]()
-
-                                if events[randomChoice][2] > 0 then
-                                    eventTimer = events[randomChoice][2]
+                                    if events[randomChoice][2] > 0 then
+                                        eventTimer = events[randomChoice][2]
+                                    end
                                 end
                             end
-                        end
 
-                    else
-                        table.remove(balls, i)
-                        table.remove(ball_velocities, i)
+                        else
+                            table.remove(balls, i)
+                            table.remove(ball_velocities, i)
 
-                        if #balls == 0 then
-                            endScreen = true
+                            if #balls == 0 then
+                                endScreen = true
+                            end
                         end
                     end
                 end
+
             end
 
-            ::continue::
+            
         end
 
         -- if there is a random event playing and eventTimer is > 0, set up curr_time... otherwise, make curr_time = 0

@@ -109,6 +109,7 @@ function Tennis_1P.reset()
     -- reset music
     setEndMusic = false
     TEsound.stop("endMenu")
+    TEsound.stop("winMenu")
 end
 
 function Tennis_1P.tennis(dt)
@@ -213,6 +214,21 @@ function Tennis_1P.tennis(dt)
         end
     end
 
+    -- check if ball is off screen and game is over
+    if winScreen == true then
+        if ball.x > WINDOWWIDTH then
+            ball_velocity.x = 0
+            ball_velocity.y = 0
+        end
+    end
+
+    if loseScreen == true then 
+        if ball.x < -ball.width then
+            ball_velocity.x = 0
+            ball_velocity.y = 0
+        end
+    end
+
     if AI_score == 10 then
         loseScreen = true
     end
@@ -222,8 +238,13 @@ function Tennis_1P.tennis(dt)
     end
 
     -- play end music
-    if (loseScreen == true or winScreen == true) and setEndMusic == false then
+    if loseScreen == true and setEndMusic == false then
         TEsound.playLooping(gameOverMusic, "stream", "endMenu", nil, 0.5)
+
+        setEndMusic = true
+    end
+    if winScreen == true and setEndMusic == false then
+        TEsound.playLooping(winMusic, "stream", "winMenu", nil, 0.5)
 
         setEndMusic = true
     end
@@ -262,8 +283,14 @@ function Tennis_1P.keypressed(key)
 end
 
 function Tennis_1P.isGameOver()
-    if lose == true or win == true then
+    if lose == true then
         TEsound.stop("endMenu")
+
+        return true
+    end
+
+    if win == true then
+        TEsound.stop("winMenu")
 
         return true
     end

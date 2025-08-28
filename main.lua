@@ -5,7 +5,7 @@
 
 require "gamemodes/handball"
 require "gamemodes/tennis_1p"
-require "TEsound"
+require "tesound"
 
 -- get window width & height
 -- i think it's like 800 x 600
@@ -72,6 +72,7 @@ function love.load()
 
     menuMusic = "assets/audio/music/main_menu.ogg"
     gameOverMusic = "assets/audio/music/game_over.ogg"
+    winMusic = "assets/audio/music/win_endSong.ogg"
 
     TEsound.volume("all", .2)
 
@@ -118,6 +119,12 @@ function love.update(dt)
     end
 
     prev_state = game_state
+
+
+    -- update shader time
+    if crtShader then
+        crtShader:send("elapsed", love.timer.getTime())
+    end
 
     -- they told me to do this
     TEsound.cleanup()
