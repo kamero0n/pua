@@ -183,7 +183,7 @@ function drawMenu()
     -- draw game title
     love.graphics.setColor(1, 1, 1, 1)
 
-    love.graphics.printf("PONG", startX - 130, titleY + 10, font:getWidth("PONG"), "center")
+    love.graphics.printf("PONG", startX - 130, titleY + 40, font:getWidth("PONG"), "center")
 
     love.graphics.setFont(smallFont)
 
