@@ -5,6 +5,7 @@
 
 require "gamemodes/handball"
 require "gamemodes/tennis_1p"
+require "gamemodes/tennis_2p"
 require "tesound"
 
 -- get window width & height
@@ -16,7 +17,8 @@ local game_state = 'menu'
 local prev_state = game_state
 local menus = {
     'Handball',
-   'Tennis (1P)'
+   'Tennis (1P)',
+   'Tennis (2P)'
 }
 local selected_menu_item = 1
 
@@ -97,10 +99,15 @@ function love.update(dt)
         TEsound.stop("menu")
 
         Tennis_1P.tennis(dt)
+    elseif game_state == 'tennis_2p' then
+        TEsound.stop("menu")
+
+        Tennis_2P.tennis(dt)
     end
 
     -- check if handball lost
     if Handball.isGameOver() then
+
         game_state = "menu"
 
         Handball.reset()
@@ -113,7 +120,14 @@ function love.update(dt)
         Tennis_1P.reset()
     end
 
-    if game_state == "menu" and (prev_state == "handball" or prev_state == "tennis_1p") then
+    -- check if tennis 2p is over
+    if Tennis_2P.isGameOver() then
+        game_state = "menu"
+
+        Tennis_2P.reset()
+    end
+
+    if game_state == "menu" and (prev_state == "handball" or prev_state == "tennis_1p" or prev_state == "tennis_2p") then
         TEsound.playLooping(menuMusic, "stream", "menu", nil, 0.3)
     end
 
@@ -224,6 +238,8 @@ function love.draw()
         Handball.drawGame()
     elseif game_state == "tennis_1p" then
         Tennis_1P.drawGame()
+    elseif game_state == "tennis_2p" then
+        Tennis_2P.drawGame()
     end
     
     -- i think this means we take the canvas out as it is now ready to be used
@@ -242,6 +258,8 @@ function love.keypressed(key, scan_code, is_repeat)
         Handball.keypressed(key)
     elseif game_state == "tennis_1p" then
         Tennis_1P.keypressed(key)
+    elseif game_state == "tennis_2p" then
+        Tennis_2P.keypressed(key)
     end
 end
 
@@ -274,6 +292,10 @@ function menu_keypressed(key)
             Tennis_1P.init()
 
             game_state = 'tennis_1p'
+        elseif menus[selected_menu_item] == 'Tennis (2P)' then
+            Tennis_2P.init()
+
+            game_state = 'tennis_2p'
         end
     end
 end

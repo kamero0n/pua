@@ -117,6 +117,10 @@ function Tennis_2P.reset()
 end
 
 function Tennis_2P.tennis(dt)
+    if love.keyboard.isDown("b") then
+        player1WinScreen = true
+    end
+
     if pauseScreen ~= true then
         -- human paddle movements
         if love.keyboard.isDown("down") then
@@ -171,13 +175,13 @@ function Tennis_2P.tennis(dt)
                     ball_velocity.x = ball_velocity.x * (-1)
                     ball.x = paddle.x + paddle.width
 
-                    Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+                    Tennis_2P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
 
                     TEsound.play(paddleHit, "static")
                 else
                     player2_score = player2_score + 1
 
-                    Tennis_1P.randomize_ball(false)
+                    Tennis_2P.randomize_ball(false)
                 end
             end
 
@@ -189,13 +193,13 @@ function Tennis_2P.tennis(dt)
                     ball_velocity.x = ball_velocity.x * (-1)
                     ball.x = paddle2.x
 
-                    Tennis_1P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
+                    Tennis_2P.increase_ballSpeed(ball_velocity.x, ball_velocity.y)
 
                     TEsound.play(paddleAIHit, "static")
                 else
                     score = score + 1
 
-                    Tennis_1P.randomize_ball(true)
+                    Tennis_2P.randomize_ball(true)
                 end
             end
         end
@@ -333,7 +337,7 @@ function Tennis_2P.drawGame()
 
         -- set smaller font
         love.graphics.setFont(smallFont)
-        love.graphics.printf("Player 2 won :D", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2, 400, "left")
+        love.graphics.printf("Player 2 won :D", WINDOWWIDTH / 2 - 240, WINDOWHEIGHT / 2, 500, "left")
 
         -- go back to menu or restart
         love.graphics.setFont(smallerFont)
@@ -353,7 +357,7 @@ function Tennis_2P.drawGame()
 
         -- set smaller font
         love.graphics.setFont(smallFont)
-        love.graphics.printf("Player 1 won :D", WINDOWWIDTH / 2 - 150, WINDOWHEIGHT / 2, 400, "left")
+        love.graphics.printf("Player 1 won :D", WINDOWWIDTH / 2 - 240, WINDOWHEIGHT / 2, 500, "left")
 
         -- go back to menu or restart
         love.graphics.setFont(smallerFont)
